@@ -1,0 +1,2 @@
+* non existent branch fetch head wrong update checking.
+  solution: parse return of `git fetch` to determine true new updates.
