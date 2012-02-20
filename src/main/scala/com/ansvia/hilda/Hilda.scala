@@ -105,6 +105,7 @@ Internal Ansvia modules updater.
 			options += 'node -> true 
 			println("Running as node")
 		}
+
 		cli.reqd[String]("","--hilda-home", "Use non standard hilda home."){ v =>
 			options += 'hildaHome -> v
 			setHildaHome(v)
@@ -192,6 +193,7 @@ Internal Ansvia modules updater.
 					if ((new File(HILDA_HOME + "/modules.xml")).exists()) {
 						println(" Hilda already installed")
 						println(" Edit `~/.hilda/modules.xml` if you want to customize modules.")
+						println(" If not yet configured please run `hilda configure` using your account (not root)")
 						println("")
 						System.exit(1)
 					}
@@ -217,7 +219,7 @@ Internal Ansvia modules updater.
 							Initializer.generateModuleXml()
 							Initializer.generateLogConfigXML()
 							
-							println("Installation completed. If not yet configured please run `hilda configure` using your account (not root)")
+							println("Installation completed.")
 							println("Or type `hilda` for other usage details.")
 							
 							rv = Error.SUCCESS
@@ -225,7 +227,15 @@ Internal Ansvia modules updater.
 					
 						
 					}
+					
+				case "state" =>
 				
+					val mods = Module.getModules()
+					mods foreach { mod => 
+						println(" [ " + mod.getName() + " ] " + mod.getState())
+					}
+					
+					rv = Error.SUCCESS
 				
 				case "uninstall" =>
 					rv = Initializer.uninstallScript()

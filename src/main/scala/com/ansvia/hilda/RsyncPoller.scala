@@ -42,4 +42,5 @@ case class RsyncPoller(source:RsyncSource) extends IPoller with Executor {
 		return true
 	}
 	def getNewChanges():String = null
+	def getCurrentStatus() = "Rsync poller doesn't support get current status"
 }

@@ -85,6 +85,15 @@ case class GitPoller(gitUri:String, branch:String) extends IPoller with Executor
 		
 		return true
 	}
+
+	def getCurrentStatus():String = {
+		val rv = exec("git status")
+		val modified = rv.contains("modified")
+		val branch = rv.split("\n")(0).split(" ")(3)
+		"branch: %s, modified: %s".format(branch, if(modified) "true" else "false")
+	}
+		
+		
 	
 }
 

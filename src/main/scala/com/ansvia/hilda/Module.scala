@@ -24,6 +24,7 @@ trait IHildaModule {
 	def getName():String
 	def selfUpdate():Unit
 	def executeTarget(targetName:String):Unit
+	def getState():String
 }
 
 abstract class HildaModule(name:String) extends IHildaModule {
@@ -60,15 +61,18 @@ case class RemoteModule(name:String, nodeName:String, nodeHost:String) extends H
 		var rv = name + " (remote)\n\n"
 		return rv
 	}
+	def getState() = "Remote module doesn't support get state"
 }
 
 case class StandardModule(updater: Updater,
 	name: String, depends: Array[String],
 	poller: IPoller, workDir: String, hooks: Array[Hook]) 
-	extends HildaModule(name) 
-	with Translator {
+		extends HildaModule(name) 
+		with Translator {
 
 	private val log = LoggerFactory.getLogger(getClass)
+	
+	val workDirState = poller.asInstanceOf[Executor].setWorkingDir(workDir)
 
 	var targets = List[Target]()
 
@@ -121,6 +125,8 @@ case class StandardModule(updater: Updater,
 			}
 		}
 	}
+	
+	def getState() = poller.getCurrentStatus()
 
 	def selfUpdate() {
 	  
@@ -145,8 +151,6 @@ case class StandardModule(updater: Updater,
 		status("Checking for new available update...")
 
 		var updateAvailable = false
-
-		val workDirState = poller.asInstanceOf[Executor].setWorkingDir(workDir)
 
 		if (poller.updateAvailable()) {
 

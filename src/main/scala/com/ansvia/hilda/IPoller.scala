@@ -14,6 +14,7 @@ trait IPoller {
 		//status("New commit: " + poller.getNewChanges(workDir))
 		//status("Updating...")
 	}
+	def getCurrentStatus():String
 	def status(msg:String) {
 		println("    [" + POLLER_NAME + "]: " + msg)
 	}
