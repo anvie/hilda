@@ -6,7 +6,7 @@ Project updater, deployment, and management tool. Support Git and Rsync protocol
 
 
 Usage
-======
+-------
 
     $ hilda update
 
@@ -18,7 +18,7 @@ To get current state in all of projects.
 
 
 Installation
-=============
+-------------
 
 
 	$ git clone git://github.com/anvie/hilda.git
