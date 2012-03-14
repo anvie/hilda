@@ -25,6 +25,7 @@ trait IHildaModule {
 	def selfUpdate():Unit
 	def executeTarget(targetName:String):Unit
 	def getState():String
+	def getPoller:IPoller
 }
 
 abstract class HildaModule(name:String) extends IHildaModule {
@@ -41,6 +42,8 @@ case class RemoteModule(name:String, nodeName:String, nodeHost:String) extends H
 	RemoteActor.classLoader = getClass().getClassLoader()
 	
 	def getName():String = name
+	def getPoller:IPoller = null
+	
 	def selfUpdate() {
 		status("selfUpdate()...")
 		
@@ -71,6 +74,7 @@ case class StandardModule(updater: Updater,
 		with Translator {
 
 	private val log = LoggerFactory.getLogger(getClass)
+	poller.setModule(this)
 	
 	val workDirState = poller.asInstanceOf[Executor].setWorkingDir(workDir)
 
@@ -90,6 +94,7 @@ case class StandardModule(updater: Updater,
 
 	def getName() = name
 	def getWorkDir() = workDir
+	def getPoller = poller
 
 	private def executeHook(when: String) {
 		val hooks_ = hooks.filter(_.is(when))

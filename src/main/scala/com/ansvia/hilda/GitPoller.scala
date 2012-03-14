@@ -85,6 +85,32 @@ case class GitPoller(gitUri:String, branch:String) extends IPoller with Executor
 		
 		return true
 	}
+	
+	def setBranch(br:String){
+	  var rv = exec("git status")
+	  val branch = rv.split("\n")(0).split(" ")(3).trim()
+	  if (branch != br){
+	    rv = exec("git branch")
+	    var notFound = true
+	    rv.split("\n").foreach { b =>
+	      if(!b.contains("*") && b.endsWith(" " + br)) {
+	        rv = exec("git checkout " + br)
+	        println(rv)
+	        notFound = false
+	      }
+	    }
+	    if(notFound){
+	      println("! Branch doesn't exists `" + br + "` for `" + this.mod.getName() + "`")
+	      println("Trying to fetch from remote server...")
+	      rv = exec("git fetch --all")
+	      println(rv)
+	      rv = exec("git checkout " + br)
+	      println(rv)
+	    }
+	  }else{
+	    status("Already on branch `" + br + "`")
+	  }
+	}
 
 	def getCurrentStatus():String = {
 		val rv = exec("git status")

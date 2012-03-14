@@ -5,6 +5,10 @@ import java.io.File
 
 trait IPoller {
 	val POLLER_NAME = "IPoller"
+	  
+	var mod:IHildaModule = null
+	
+	def setModule(mod:IHildaModule) { this.mod = mod }
 
 	def updateAvailable():Boolean
 	def updateWorkTree():Boolean
