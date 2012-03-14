@@ -17,11 +17,10 @@ import ch.qos.logback.classic.joran.JoranConfigurator
 import ch.qos.logback.classic.LoggerContext
 import sun.misc.Signal
 import sun.misc.SignalHandler
-//import com.sun.jersey.api.container.httpserver.HttpServerFactory
 
 object Hilda {
 
-	val VERSION = "0.0.4"
+	val VERSION = "0.0.5"
 	val BANNER = """
 Hilda v""" + VERSION + """
 Copyright (C) 2011 Ansvia Inc.
@@ -84,7 +83,8 @@ Internal Ansvia modules updater.
 				'routerPort -> 4912,
 				'routerName -> "hilda",
 				'node -> false,
-				'hildaHome -> HILDA_HOME)
+				'hildaHome -> HILDA_HOME,
+				'hildaVersion -> false)
 		
 		var cli = new OptionParser()
 		cli.banner = BANNER
@@ -111,6 +111,11 @@ Internal Ansvia modules updater.
 			options += 'hildaHome -> v
 			setHildaHome(v)
 		}
+		
+		cli.flag("","--version", "Show Hilda version and exit") { () =>
+			options += 'hildaVersion -> true
+		}
+		
 		try {
 			cli.parse(args)
 		}catch{case e => 
@@ -121,6 +126,11 @@ Internal Ansvia modules updater.
 		if (args.length < 1) {
 			showUsageAndExit(cli)
 			return
+		}
+		
+		if(options('hildaVersion) == true){
+		  println(VERSION)
+		  return
 		}
 
 		var rv = Error.UNKNOWN_ERROR
@@ -191,7 +201,9 @@ Internal Ansvia modules updater.
 					}
 					
 				case "install" =>
-					if ((new File(HILDA_HOME + "/modules.xml")).exists() && (new File(INSTALL_PREFIX + "/bin/hilda")).exists()) {
+					if ((new File(HILDA_HOME + "/modules.xml")).exists() && 
+					    (new File(INSTALL_PREFIX + "/bin/hilda")).exists())
+					{
 						println(" Hilda already installed")
 						println(" Edit `~/.hilda/modules.xml` if you want to customize modules.")
 						println(" If not yet configured please run `hilda configure` using your account (not root)")
