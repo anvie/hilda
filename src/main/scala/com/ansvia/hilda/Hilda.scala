@@ -20,7 +20,7 @@ import sun.misc.SignalHandler
 
 object Hilda {
 
-	val VERSION = "0.0.6-dev"
+	val VERSION = "0.0.7-dev"
 	val BANNER = """
 Hilda v""" + VERSION + """
 Copyright (C) 2011 Ansvia Inc.
@@ -249,22 +249,6 @@ Internal Ansvia modules updater.
 					}
 					
 					rv = Error.SUCCESS
-					
-				case "setbr" =>
-				  
-				    if (args.length > 1){
-				      
-						Module.getModules().foreach { mod =>
-						  val br = args.toList(1).trim()
-						  println("Set branch `%s` for `%s`...".format(br, mod.getName()))
-						  mod.getPoller match {
-						    case p:GitPoller => p.setBranch(br)
-						    case _ => println(mod.getPoller) 
-						  }
-						}
-						
-						rv = Error.SUCCESS
-				    }
 				
 				case "uninstall" =>
 					rv = Initializer.uninstallScript()
@@ -289,6 +273,9 @@ Internal Ansvia modules updater.
 				*/
 				
 				case _ =>
+				  // invoke internal / custom poller command
+				  // just work like plugins
+				  rv = Commander.processCommand(args)
 			}
 		}
 

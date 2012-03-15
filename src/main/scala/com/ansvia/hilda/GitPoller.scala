@@ -105,7 +105,9 @@ case class GitPoller(gitUri:String, branch:String) extends IPoller with Executor
 	      rv = exec("git fetch --all")
 	      println(rv)
 	      rv = exec("git checkout " + br)
-	      println(rv)
+	      if (rv.contains("error")) {
+	        println("Branch `%s` not found on remote server".format(br))
+	      }
 	    }
 	  }else{
 	    status("Already on branch `" + br + "`")
@@ -122,4 +124,3 @@ case class GitPoller(gitUri:String, branch:String) extends IPoller with Executor
 		
 	
 }
-

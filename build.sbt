@@ -2,7 +2,7 @@ import AssemblyKeys._
 
 name := "Hilda"
 
-version := "0.0.6-dev"
+version := "0.0.7-dev"
 
 scalaVersion := "2.9.1"
 

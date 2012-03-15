@@ -7,4 +7,5 @@ object Error {
 	val DATA_NOT_LOADED = 7
 	val CANNOT_LOAD_MODULE = 6
 	val UNKNOWN_ERROR = 11
+	val NOT_IMPLEMENTED = 12
 }
