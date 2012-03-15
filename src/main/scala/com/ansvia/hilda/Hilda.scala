@@ -20,7 +20,7 @@ import sun.misc.SignalHandler
 
 object Hilda {
 
-	val VERSION = "0.0.7-dev"
+	val VERSION = "0.0.8-dev"
 	val BANNER = """
 Hilda v""" + VERSION + """
 Copyright (C) 2011 Ansvia Inc.
