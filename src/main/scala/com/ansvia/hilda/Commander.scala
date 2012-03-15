@@ -6,6 +6,8 @@ trait Commander {
 
 class BaseCommander(protected val prefix:String) extends Commander {
   
+  lazy final val HELP = getCmd("help")
+  
   /**
    * method processCommand should override by subclass
    */
@@ -17,7 +19,6 @@ class BaseCommander(protected val prefix:String) extends Commander {
 object GitCommander extends BaseCommander("git") {
   
   lazy final val CHBR = getCmd("chbr")
-  lazy final val HELP = getCmd("help")
   
   override def processCommand(args:Array[String]):Int = {
     var rv:Int = Error.UNKNOWN_ERROR
@@ -41,8 +42,8 @@ object GitCommander extends BaseCommander("git") {
 		case HELP =>
 		  val info = "Hilda Git Commander\n" +
 				  	 "Usage:\n" +
-				  	 "   git:chbr [BRANCH-NAME] --- Change branch for all modules to :BRANCH-NAME.\n" +
-				  	 "   git:help --- Show this help and exit.\n"
+				  	 "   git:chbr [BRANCH-NAME] -- Change branch for all modules to :BRANCH-NAME.\n" +
+				  	 "   git:help -- Show this message and exit.\n"
 		  println(info)
 		  rv = Error.SUCCESS
 	}
