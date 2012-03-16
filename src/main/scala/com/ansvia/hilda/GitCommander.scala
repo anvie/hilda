@@ -67,6 +67,7 @@ object GitCommander extends BaseCommander("git") {
           "Usage:\n" +
           "   git:chbr [BRANCH] -- Change branch for all modules to :BRANCH.\n" +
           "   git:push [REMOTE] [BRANCH] -- Push all modules to :REMOTE :BRANCH\n" +
+		  "   git:pull [REMOTE] [BRANCH] -- Pull all modules from :REMOTE :BRANCH\n" +
           "   git:help -- Show this message and exit.\n"
         println(info)
         rv = Error.SUCCESS
