@@ -11,6 +11,7 @@ object GitCommander extends BaseCommander("git") {
 
   lazy final val CHBR = getCmd("chbr")
   lazy final val PUSH = getCmd("push")
+  lazy final val PULL = getCmd("pull")
 
   override def processCommand(args:Array[String]):Int = {
     var rv:Int = Error.UNKNOWN_ERROR
@@ -40,6 +41,21 @@ object GitCommander extends BaseCommander("git") {
             println("[%s] push `%s` -> `%s`...".format(mod.getName(), origin, br))
             mod.getPoller match {
               case p:GitPoller => p.push(origin, br)
+              case _ => println(mod.getPoller)
+            }
+          }
+
+          rv = Error.SUCCESS
+        }
+      case PULL =>
+        if (args.length > 2){
+
+          Module.getModules().foreach { mod =>
+            val origin = cmds(1).trim()
+            val br = cmds(2).trim()
+            println("[%s] pull `%s` <- `%s`...".format(mod.getName(), origin, br))
+            mod.getPoller match {
+              case p:GitPoller => p.pull(origin, br)
               case _ => println(mod.getPoller)
             }
           }

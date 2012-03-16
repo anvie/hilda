@@ -132,6 +132,22 @@ case class GitPoller(gitUri:String, branch:String) extends IPoller with Executor
     }
   }
 
+  def pull(origin:String, br:String){
+    var rv:String = "success"
+
+    val branch = getCurrentBranch()
+
+    if (branch != br){
+      // checkout first
+      rv = exec("git checkout " + br)
+    }
+
+    if (!rv.toLowerCase.contains("error")){
+      rv = exec("git pull %s %s".format(origin, br))
+      println(rv)
+    }
+  }
+
 	def getCurrentStatus():String = {
 		val rv = exec("git status")
 		val modified = rv.contains("modified")
