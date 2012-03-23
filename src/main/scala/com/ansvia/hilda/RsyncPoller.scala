@@ -1,5 +1,4 @@
 package com.ansvia.hilda
-import java.io.File
 import java.io.IOException
 
 abstract class RsyncSource {

@@ -47,7 +47,7 @@ sealed class ExternalScriptTarget(mod: StandardModule, name: String, scriptLoc: 
 	def execute() {
 		status("Executing...")
 		setWorkingDir(mod.translate(workDir, true))
-		exec(Array("sh", Hilda.getHildaHome() + "/target_script/" + scriptLoc + ".sh"))
+		exec(Array("sh", Hilda.getHildaHome + "/target_script/" + scriptLoc + ".sh"))
 	}
 	override def toString() = name
 	def getName():String = name

@@ -1,10 +1,9 @@
 package com.ansvia.hilda
-import java.io.File
-
 
 
 trait IPoller {
 	val POLLER_NAME = "IPoller"
+    var silent:Boolean = false
 	  
 	var mod:IHildaModule = null
 	
@@ -20,9 +19,13 @@ trait IPoller {
 	}
 	def getCurrentStatus():String
 	def status(msg:String) {
-		println("    [" + POLLER_NAME + "]: " + msg)
+		if (!silent)
+            println("    [" + POLLER_NAME + "]: " + msg)
 	}
 	override def toString():String = POLLER_NAME
+    def setSilent(state:Boolean){
+        silent = state
+    }
 }
 
 

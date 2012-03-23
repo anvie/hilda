@@ -51,7 +51,7 @@ object Initializer {
 	}
 	
 	def ensureHildaHome(){
-		val home = new File(Hilda.getHildaHome())
+		val home = new File(Hilda.getHildaHome)
 		
 		if(!home.exists()){
 			home.mkdir()
@@ -59,7 +59,7 @@ object Initializer {
 	}
 	
 	def HildaHome(block: () => Unit): Unit = {
-		if(!(new File(Hilda.getHildaHome())).exists()){
+		if(!(new File(Hilda.getHildaHome)).exists()){
 			log.error("Hilda home does not exitss, please run `install` first")
 		}else{
 			try{
@@ -136,10 +136,10 @@ java -Xmx512M -jar %s/hilda-%s.jar $*
 			}
 			
 			// remove hilda home
-			val dir = new File(Hilda.getHildaHome())
+			val dir = new File(Hilda.getHildaHome)
 			if(dir.exists()){
 				val cli = new jline.ConsoleReader()
-				cli.readLine("Remove also `" + Hilda.getHildaHome() + "` ? (this action cannot be undone!) [y/N]:").toLowerCase() match {
+				cli.readLine("Remove also `" + Hilda.getHildaHome + "` ? (this action cannot be undone!) [y/N]:").toLowerCase() match {
 					case "y" => 
 						FileUtils.deleteDirectory(dir)
 				}
@@ -166,9 +166,9 @@ java -Xmx512M -jar %s/hilda-%s.jar $*
 		var again:String = null
 		var cli = new jline.ConsoleReader()
 		
-		val hildaModules = Hilda.getHildaHome() + "/modules.xml"
+		val hildaModules = Hilda.getHildaHome + "/modules.xml"
 		
-		val home = new File(Hilda.getHildaHome())
+		val home = new File(Hilda.getHildaHome)
 		
 		if(!home.exists()){
 			home.mkdir()
@@ -231,7 +231,7 @@ java -Xmx512M -jar %s/hilda-%s.jar $*
   </root>
 </configuration>
 """
-		val f = new FileWriter(Hilda.getHildaHome() + "/log-config-simple.xml")
+		val f = new FileWriter(Hilda.getHildaHome + "/log-config-simple.xml")
 		f.write(tmpl)
 		f.close()
 	}
@@ -248,7 +248,7 @@ java -Xmx512M -jar %s/hilda-%s.jar $*
 """
 		var cli = new jline.ConsoleReader() 
 		val asMaster = cli.readLine("As master? [y/n]: ")
-		val f = new FileWriter(Hilda.getHildaHome() + "/config.xml")
+		val f = new FileWriter(Hilda.getHildaHome + "/config.xml")
 		f.write(tmpl)
 		f.close()
 	}
