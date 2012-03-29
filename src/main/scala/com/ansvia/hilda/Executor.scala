@@ -9,8 +9,13 @@ import org.slf4j.LoggerFactory;
 trait Executor extends WorkingDir {
 	
 	private val log = LoggerFactory.getLogger(getClass)
-	protected val ENV_VARS = Array[String]("PATH=/bin:/usr/bin:/usr/local/bin:/opt/bin:/opt/local/bin")
-	
+    private lazy val SystemEnv = System.getenv()
+	protected lazy val ENV_VARS:Array[String] =
+            (Array[String]("PATH=/bin:/usr/bin:/usr/local/bin:/opt/bin:/opt/local/bin") ++
+            SystemEnv.keySet().toArray().map { key =>
+                "%s=%s".format(key, SystemEnv.get(key))
+            });
+
 	def exec(cmd:String):String = exec(cmd.split(" "))
 	
 	def exec(cmd:Array[String]):String = {
@@ -20,7 +25,9 @@ trait Executor extends WorkingDir {
 			log.error("Executor.workDir not initialized")
 			return "Aborted"
 		}
-		
+
+        log.info("ENVIRONMENT VARIABLES:")
+        log.info(ENV_VARS.foldLeft("")(_ + _ + "\n"))
 		log.info("Executing `" + cmd.reduceLeft(_+ " " + _) + "`")
 		
 		var proc:Process = null
@@ -46,9 +53,7 @@ trait Executor extends WorkingDir {
 		}else{
 			log.info(" > " + result)
 		}
-		
-		
-		
+
 		return result
 	}
 }

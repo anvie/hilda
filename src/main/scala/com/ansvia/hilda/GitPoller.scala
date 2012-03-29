@@ -189,6 +189,9 @@ case class GitPoller(gitUri:String, branch:String)
     }
 
     def getCurrentStatus():String = {
+        // bellow line used for test only, show some environment variable
+        // inside of /tmp/test.sh: echo $SOME_VAR
+        //println(exec(Array("sh","/tmp/test.sh")))
         val rv = exec("git status")
         val modified = rv.contains("modified")
         val branch = rv.split("\n")(0).split(" ")(3)
