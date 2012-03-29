@@ -7,7 +7,7 @@ case class GitPoller(gitUri:String, branch:String)
         extends IPoller
         with Executor
         with CacheManager
-        with Logger {
+        with MutableLogger {
 
     override val POLLER_NAME = "(Git) " + gitUri
 
@@ -15,6 +15,12 @@ case class GitPoller(gitUri:String, branch:String)
     var newCommit:String = ""
     var localCommit:String = ""
     var cachedUpdateAvailable = false
+
+    if (!isLoggerReady){
+        // if no any logger binded yet use Slf4jLogger as default.
+        object slf4log extends Slf4jLogger {}
+        log = slf4log
+    }
 
     override def setWorkingDir(workDir:String):Int = {
         super.setWorkingDir(workDir)
@@ -192,12 +198,19 @@ case class GitPoller(gitUri:String, branch:String)
         // bellow line used for test only, show some environment variable
         // inside of /tmp/test.sh: echo $SOME_VAR
         //println(exec(Array("sh","/tmp/test.sh")))
-        val rv = exec("git status")
-        val modified = rv.contains("modified")
-        val branch = rv.split("\n")(0).split(" ")(3)
-        "branch: %s, modified: %s".format(branch, if(modified) "true" else "false")
+        val Seq(branch, modified) = getCurrentStatusList
+        "branch: %s, modified: %s".format(branch, modified)
     }
 
-
+    def getCurrentStatusList:Seq[String] = {
+        info("Getting module status for `%s`...".format(this.mod.getName()))
+        val rv = exec("git status")
+        val modified = if (rv.contains("modified"))
+            "true"
+        else
+            "false"
+        val branch = rv.split("\n")(0).split(" ")(3)
+        Seq(branch, modified)
+    }
 
 }

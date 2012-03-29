@@ -29,7 +29,7 @@ libraryDependencies ++= Seq(
 	"jline" % "jline" % "1.0",
 	"ch.qos.logback" % "logback-core" % "1.0.0",
 	"ch.qos.logback" % "logback-classic" % "1.0.0",
-	"commons-io" % "commons-io" % "2.1"
-	//"com.reportgrid" % "blueeyes_2.9.1" % "0.4.24" % "compile"
+	"commons-io" % "commons-io" % "2.1",
+	"org.scala-lang" % "scala-swing" % "2.9.1"
 )
 

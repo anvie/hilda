@@ -243,6 +243,15 @@ Internal Ansvia modules updater.
 
                     rv = Error.SUCCESS
 
+                case "ui" =>
+                    val mainUi = new ui.MainWindow()
+
+                    mainUi.main(args)
+
+                    rv = Error.SUCCESS
+
+                    return
+
                 case "uninstall" =>
                     rv = Initializer.uninstallScript()
 
