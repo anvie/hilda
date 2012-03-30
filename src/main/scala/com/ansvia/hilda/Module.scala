@@ -29,16 +29,20 @@ trait IHildaModule {
     def getVersion:String
 }
 
-abstract class HildaModule(name:String) extends IHildaModule {
+abstract class HildaModule(name:String) extends IHildaModule with MutableLogger {
 	def status(msg: String) {
-		println(" + [Mod][" + name + "]: " + msg)
+		log.print(" + [Mod][" + name + "]: " + msg + "\n")
 	}
 }
 
 
 case class RemoteModule(name:String, nodeName:String, nodeHost:String) extends HildaModule(name) {
 	
-	private val log = LoggerFactory.getLogger(getClass)
+	//private val log = LoggerFactory.getLogger(getClass)
+
+    if (log == null){
+        log = new Slf4jLogger {}
+    }
 	
 	RemoteActor.classLoader = getClass().getClassLoader()
 	
@@ -76,9 +80,15 @@ case class StandardModule(updater: Updater,
 	poller: IPoller, workDir: String, hooks: Array[Hook],
     version:IVersionGetter)
 		extends HildaModule(name) 
-		with Translator {
+		with Translator
+        with MutableLogger {
 
-	private val log = LoggerFactory.getLogger(getClass)
+	//private val log = LoggerFactory.getLogger(getClass)
+    
+    if (log == null){
+        log = new Slf4jLogger {}
+    }
+    
 	poller.setModule(this)
 	
 	val workDirState = poller.asInstanceOf[Executor].setWorkingDir(workDir)
@@ -170,7 +180,7 @@ case class StandardModule(updater: Updater,
 
 	def selfUpdate() {
 	  
-		log.info("selfUpdate(): " + name);
+		//log.info("selfUpdate(): " + name);
 
 		if (DgModuleSyncronizer.isAlreadyExecuted(name)) {
 			return
@@ -215,6 +225,58 @@ case class StandardModule(updater: Updater,
 
 	}
 
+    def selfUpdateCallback(callback:(String) => Unit) {
+
+        //log.info("selfUpdate(): " + name);
+
+        if (DgModuleSyncronizer.isAlreadyExecuted(name)) {
+            return
+        }
+
+        if (depends.length > 0) {
+            for (mn <- depends) {
+                val mod = updater.getModule(mn)
+                if (mod == null) {
+                    throw new Exception("Invalid dependency module `" + mn + "`, cannot execute depens module")
+                }
+                mod match {
+                    case x:StandardModule =>
+                        x.selfUpdateCallback(callback)
+                    case _ =>
+                        mod.selfUpdate()
+                }
+            }
+        }
+
+        executeHook(HookEvent.WHEN_TO_UPDATE)
+
+        callback("Checking for new available update...")
+
+        var updateAvailable = false
+
+        if (poller.updateAvailable()) {
+
+            updateAvailable = true
+
+            val changes: String = poller.getNewChanges()
+            if (changes != null) {
+                callback("Update available. rev: `%s`.".format(changes))
+                callback("Updating now...")
+            }
+
+            poller.updateWorkTree()
+        }
+
+        callback("Done.")
+
+        if (updateAvailable == true || workDirState == WorkDirState.WORK_DIR_JUST_CREATED) {
+            executeHook(HookEvent.WHEN_FINISH_UPDATE)
+        }
+
+        DgModuleSyncronizer.markAlreadyExecuted(name)
+
+    }
+    
 	def addTarget(target: Target) { targets :+= target }
 
 	override def toString: String = {

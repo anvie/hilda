@@ -11,7 +11,9 @@ package com.ansvia.hilda.ui
 import swing.event._
 import swing._
 import GridBagPanel._
-import com.ansvia.hilda.{ILogger, GitPoller, Hilda, Updater}
+import com.ansvia.hilda._
+import javax.swing.event.TableModelListener
+import javax.swing.table.{AbstractTableModel, TableModel}
 
 
 class MainWindow extends SimpleSwingApplication {
@@ -36,6 +38,14 @@ class MainWindow extends SimpleSwingApplication {
             mui
         }
     }
+    
+    def getUiModule(name:String):IModuleUi = {
+        for (mui <- modules){
+            if (mui.getName == name)
+                return mui
+        }
+        null
+    }
 
     lazy val ui = new BoxPanel(Orientation.Vertical) {
         border = Swing.EmptyBorder(10)
@@ -43,17 +53,40 @@ class MainWindow extends SimpleSwingApplication {
         lazy val lblStatus = new Label("Status: nunggu perintah...")
         lazy val btnExit = new Button("Metu")
         lazy val btnHelp = new Button("Tolong")
-        lazy val btnRefresh = new Button("Segarkan")
+        lazy val btnRefresh = new Button("Refresh")
+        lazy val btnUpdate = new Button("Update")
 
-        lazy val txtLog = new TextArea(5, 40){editable = false}
+        lazy val txtLog = new TextArea(9, 40){editable = false}
         lblStatus.horizontalAlignment = Alignment.Left
 
         val log = Logger(txtLog)
 
         loadModules(log)
 
+
+        object tblModel extends AbstractTableModel {
+            
+            private var modules_ = Array[Array[Any]]()
+            def setModules(mods:Array[Array[Any]]){ modules_ = mods }
+            def getModules = modules_
+
+            def getColumnCount = 4
+
+            override def getColumnName(p1: Int) = Array("Name", "Version", "Branch", "Modified").apply(p1)
+
+            def getValueAt(row: Int, col: Int): AnyRef = modules_(row)(col).asInstanceOf[AnyRef]
+
+            def getRowCount = modules.length
+
+            override def isCellEditable(p1: Int, p2: Int) = false
+            override def setValueAt(value: Any, row: Int, col: Int) {
+                modules_(row)(col) = value
+                fireTableCellUpdated(row, col)
+            }
+        }
+
         //case class Module(name:String, branch:String, modified:Boolean)
-        val model = modules.map{ m =>
+        val mods = modules.map{ m =>
             val Seq(branch, modified) = m.getState
 
             var version = m.getVersion
@@ -64,9 +97,11 @@ class MainWindow extends SimpleSwingApplication {
                 
             List(m.getName, version, branch, if (modified=="true"){ "modified" }else{ "-" } ).toArray[Any]
         }
+        tblModel.setModules(mods)
 
-        object tblMods extends Table(model, Array("Name", "Version", "Branch", "Modified")){
+        object tblMods extends Table(Array[Array[Any]](), Array("Name", "Version", "Branch", "Modified")){
             focusable = false
+            model = tblModel
         }
         object txtModInfo extends TextArea(15, 10){ editable = false }
 
@@ -80,12 +115,12 @@ class MainWindow extends SimpleSwingApplication {
                 contents.append(new ScrollPane(tblMods), new ScrollPane(txtModInfo))
             },
             new ScrollPane(txtLog),
-            new FlowPanel(FlowPanel.Alignment.Left)(btnRefresh),
+            new FlowPanel(FlowPanel.Alignment.Left)(btnRefresh, btnUpdate),
             new FlowPanel(FlowPanel.Alignment.Right)(btnHelp, btnExit))
 
         log.print("Ready.")
 
-        listenTo(btnHelp, btnExit)
+        listenTo(btnRefresh, btnUpdate, btnHelp, btnExit)
         reactions += {
             case ButtonClicked(btn) =>
                 btn.text match {
@@ -93,17 +128,55 @@ class MainWindow extends SimpleSwingApplication {
                         quit()
                     case "Tolong" =>
                         lblStatus.text = "Status: help"
+                    case "Refresh" =>
+                        val newModules = modules.map {
+                            m =>
+                                val Seq(branch, modified) = m.getState
+
+                                var version = m.getVersion
+                                if (version == "-") {
+                                    // get version from central module config files
+                                    version = m.getRawModule.getVersion
+                                }
+
+                                List(m.getName, "zzz", branch, if (modified == "true") {
+                                    "modified"
+                                } else {
+                                    "-"
+                                }).toArray[Any]
+                        } 
+                        tblModel.setModules(newModules)
+                        tblMods.repaint()
+                    case "Update" =>
+                        modules.foreach { m =>
+                            m.getRawModule match {
+                                case rwm:StandardModule =>
+                                    rwm.setLogger(log)
+                                    rwm.selfUpdateCallback { msg =>
+                                        log.info(msg)
+                                    }
+                            }
+                            m.getRawModule.selfUpdate()
+                        }
                 }
             case TableRowsSelected(_, range, false) =>
-                //log.info("row: " + lstModules.selection.rows.anchorIndex.toString)
-                val sel = tblMods.selection.cells.toArray.apply(0)
-                log.info("cells: " + sel)
-                val v = tblMods.model.getValueAt(sel._1, 0)
+                log.info("row: " + tblMods.selection.cells)
 
-                log.info(v.toString)
-                val mod = upd.getModule(v.toString)
+                if(!tblMods.selection.cells.isEmpty)
+                {
+                    val sel = tblMods.selection.cells.toArray.apply(0)
+                    //log.info("cells: " + sel)
+                    val v = tblMods.model.getValueAt(sel._1, 0)
 
-                txtModInfo.text = mod.getName
+                    getUiModule(v.toString) match {
+                        case m:GitModule =>
+                            txtModInfo.text = "LAST 10 COMMIT:\n\n" + m.getLog(10)
+                        case _ =>
+                            "-"
+                    }
+                }
+
+
 
             //case TableColumnsSelected(_, range, false) =>
             //    log.info(range.toString())

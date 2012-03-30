@@ -9,7 +9,7 @@ trait Translator extends {
 	private var data:Node = null
 	private var initialized = false
 	private var dataSet:HashMap[String, String] = null
-	private val log = LoggerFactory.getLogger(getClass)
+	//private val logInternal = LoggerFactory.getLogger(getClass)
 
 	def setDataset(data:HashMap[String, String]) {
         dataSet = data

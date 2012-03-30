@@ -103,6 +103,11 @@ case class GitModule(mod:IHildaModule) extends IModuleUi with MutableLogger {
     }
 
     def getRawModule = mod
+
+    def getLog(limit:Int) = {
+        mod.getPoller.asInstanceOf[GitPoller].exec(Array[String]("git", "log", "-" + limit.toString))
+    }
+
 }
 
 /*

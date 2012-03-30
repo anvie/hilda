@@ -15,6 +15,7 @@ trait ILogger {
     def error(msg:String)
     def debug(msg:String)
     def warn(msg:String)
+    def print(msg:String)
 }
 
 trait MutableLogger extends ILogger {
@@ -27,6 +28,7 @@ trait MutableLogger extends ILogger {
     def error(msg:String) { log.error(msg) }
     def debug(msg:String) { log.debug(msg) }
     def warn(msg:String) { log.warn(msg) }
+    def print(msg:String) { log.print(msg) }
 }
 
 trait Slf4jLogger extends ILogger {
@@ -41,6 +43,8 @@ trait Slf4jLogger extends ILogger {
     def warn(msg:String) {
         log.warn(msg)
     }
+
+    def print(msg: String){}
 }
 
 trait OffensiveLogger extends ILogger {
@@ -48,6 +52,7 @@ trait OffensiveLogger extends ILogger {
     def error(msg: String) { println("[ERROR] " + msg) }
     def debug(msg: String) { println("[DEBUG] " + msg) }
     def warn(msg: String) { println("[WARN] " + msg) }
+    def print(msg: String){ print _ }
 }
 
 class MutableLoggerSet(log0:ILogger) extends MutableLogger { log = log0 }
