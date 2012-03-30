@@ -21,11 +21,12 @@ object DgModuleSyncronizer {
 
 
 trait IHildaModule {
-	def getName():String
-	def selfUpdate():Unit
-	def executeTarget(targetName:String):Unit
-	def getState():String
+	def getName:String
+	def selfUpdate()
+	def executeTarget(targetName:String)
+	def getState:String
 	def getPoller:IPoller
+    def getVersion:String
 }
 
 abstract class HildaModule(name:String) extends IHildaModule {
@@ -41,7 +42,7 @@ case class RemoteModule(name:String, nodeName:String, nodeHost:String) extends H
 	
 	RemoteActor.classLoader = getClass().getClassLoader()
 	
-	def getName():String = name
+	def getName:String = name
 	def getPoller:IPoller = null
 	
 	def selfUpdate() {
@@ -60,16 +61,20 @@ case class RemoteModule(name:String, nodeName:String, nodeHost:String) extends H
 	def executeTarget(targetName:String){
 		status("executeTarget()...")
 	}
-	override def toString(): String = {
-		var rv = name + " (remote)\n\n"
-		return rv
+	override def toString: String = {
+        val rv = name + " (remote)\n\n"
+		rv
 	}
-	def getState() = "Remote module doesn't support get state"
+	def getState = "Remote module doesn't support get state"
+
+    // @TODO(robin): implement this
+    def getVersion:String = "-"
 }
 
 case class StandardModule(updater: Updater,
 	name: String, depends: Array[String],
-	poller: IPoller, workDir: String, hooks: Array[Hook]) 
+	poller: IPoller, workDir: String, hooks: Array[Hook],
+    version:IVersionGetter)
 		extends HildaModule(name) 
 		with Translator {
 
@@ -92,9 +97,29 @@ case class StandardModule(updater: Updater,
 	 */
 	hooks.filter(_.isInstanceOf[TargetedHook]).foreach(h => h.asInstanceOf[TargetedHook].setModule(this))
 
-	def getName() = name
-	def getWorkDir() = workDir
+	def getName = name
+	def getWorkDir = workDir
 	def getPoller = poller
+    def getVersion:String = {
+        version match {
+            case v:ProgramaticVersionGetter => v.get
+            case v:DefaultVersionGetter => v.get
+            case v:ModUiVersionGetter => 
+                if (!v.isSet){
+                    poller match {
+                        case p:GitPoller =>
+                            // we using ui module to exploit version getter routine
+                            // @TODO(robin): needs some enhancement
+                            v.setUiModule(ui.GitModule(this))
+                        case _ =>
+                            return "-"
+                    }
+                }
+                v.get
+            case _ =>
+                "-"
+        }
+    }
 
 	private def executeHook(when: String) {
 		val hooks_ = hooks.filter(_.is(when))
@@ -113,10 +138,10 @@ case class StandardModule(updater: Updater,
 			return
 		}
 		
-		if (targets.filter(t => t.getName().compare(targetName) == 0).length == 0) {
+		if (targets.filter(t => t.getName.compare(targetName) == 0).length == 0) {
 			log.error("Module `" + name + "` has no target name `" + targetName + "`")
 			println("Available target for this module is:")
-			targets foreach { t => println(" * " + t.getName() + "\n") }
+			targets foreach { t => println(" * " + t.getName + "\n") }
 			return
 		}
 
@@ -125,13 +150,23 @@ case class StandardModule(updater: Updater,
 		def notAlreadyExecuted(t: String): Boolean = !alreadyExecutedTargets.contains(t)
 
 		targets foreach { t =>
-			if (t.getName().compare(targetName) == 0 && notAlreadyExecuted(t.getName())) {
+			if (t.getName.compare(targetName) == 0 && notAlreadyExecuted(t.getName)) {
 				t.execute()
 			}
 		}
 	}
 	
-	def getState() = poller.getCurrentStatus()
+	def getState = {
+        val state = poller match {
+            case p:GitPoller =>
+                val Seq(branch, modified) = p.getCurrentStatusList
+                "branch: %s, version: %s, modified: %s".format(branch, getVersion, modified)
+            case _ =>
+                "**unknown**".format(getName)
+        }
+        state
+    } 
+        
 
 	def selfUpdate() {
 	  
@@ -161,7 +196,7 @@ case class StandardModule(updater: Updater,
 
 			updateAvailable = true
 
-			var changes: String = poller.getNewChanges()
+            val changes: String = poller.getNewChanges()
 			if (changes != null) {
 				status("Update available. rev: `%s`.".format(changes))
 				status("Updating now...")
@@ -182,14 +217,14 @@ case class StandardModule(updater: Updater,
 
 	def addTarget(target: Target) { targets :+= target }
 
-	override def toString(): String = {
+	override def toString: String = {
 		var rv = name + "\n"
 		rv += "   Source: " + poller + "\n"
 		rv += "   Working dir: " + workDir + "\n"
 		if (targets.length > 0)
-			rv += "   Targets: " + targets.map(t => t.toString()).reduce(_ + ", " + _)
+			rv += "   Targets: " + targets.map(t => t.toString).reduce(_ + ", " + _)
 		rv += "\n"
-		return rv
+		rv
 	}
 }
 
@@ -197,8 +232,8 @@ case class StandardModule(updater: Updater,
 object Module {
 	private val updater = new Updater()
 	updater.ensureConfig()
-	def getModules():Array[IHildaModule] = {
-		return updater.getModules()
+	def getModules:Array[IHildaModule] = {
+		updater.getModules
 	}
 }
 

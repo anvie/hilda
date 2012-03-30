@@ -15,7 +15,7 @@ trait Hook {
 	private val log = LoggerFactory.getLogger(getClass)
 	
 	def is(a: String):Boolean
-	def run():Unit
+	def run()
 	
 	def status(msg: String) {
 		log.info("  + [Hook]: " + msg)
@@ -30,7 +30,7 @@ class TargetedHook(when:String, targetNames:Array[String]) extends Hook {
 	private val ID = "TargetedHook"
 	private var mod:StandardModule = null
 	def is(a: String): Boolean = {
-		return this.when == a
+		this.when == a
 	}
 	def run() {
 		if(mod == null){
@@ -47,7 +47,7 @@ class ScriptedHook(when:String, content:String) extends Hook with Beautifier {
 	val HILDA_HOOK_SCRIPT = "/tmp/hilda-hook-script.sh"
 	
 	def is(a: String): Boolean = {
-		return this.when == a
+		this.when == a
 	}
 	def run() {
 		status("Running hook `" + when + "`")

@@ -14,7 +14,7 @@ object Initializer {
 	
 	class Module(name:String, depends:String, repo:String, branch:String, workDir:String) {
 		def toXML():String = {
-			var tmpl = MessageFormat.format("""
+            val tmpl = MessageFormat.format("""
 		<module name="{0}" depends="{1}">
 			<source type="git">{2}#{3}</source>
 			<work dir="{4}" />
@@ -29,19 +29,19 @@ object Initializer {
 			-->
 		</module>
 """, name, depends, repo, branch, workDir)
-			return tmpl
+			tmpl
 		}
 	}
 		
-	def genModules(modules:Set[Module]):String = { 
-		var tmpl = MessageFormat.format("""
+	def genModules(modules:Set[Module]):String = {
+        val tmpl = MessageFormat.format("""
 <hilda>
 	<modules>
 		{0}
 	</modules>
 </hilda>
-""", modules.map(z => z.toXML()).reduceLeft(_+_))
-		return tmpl
+""", modules.map(z => z.toXML()).reduceLeft(_ + _))
+		tmpl
 	};
 	
 	def CoverError(fragileOp: => Unit) {
@@ -58,7 +58,7 @@ object Initializer {
 		}
 	}
 	
-	def HildaHome(block: () => Unit): Unit = {
+	def HildaHome(block: () => Unit) {
 		if(!(new File(Hilda.getHildaHome)).exists()){
 			log.error("Hilda home does not exitss, please run `install` first")
 		}else{
@@ -69,7 +69,7 @@ object Initializer {
 					log.error("Cannot install Hilda.")
 					e.printStackTrace()
 				case e =>
-					log.error("Cannot install Hilda. " + e.toString())
+					log.error("Cannot install Hilda. " + e.toString)
 			}
 			
 		}
@@ -139,7 +139,7 @@ java -Xmx512M -jar %s/hilda-%s.jar $*
 			val dir = new File(Hilda.getHildaHome)
 			if(dir.exists()){
 				val cli = new jline.ConsoleReader()
-				cli.readLine("Remove also `" + Hilda.getHildaHome + "` ? (this action cannot be undone!) [y/N]:").toLowerCase() match {
+				cli.readLine("Remove also `" + Hilda.getHildaHome + "` ? (this action cannot be undone!) [y/N]:").toLowerCase match {
 					case "y" => 
 						FileUtils.deleteDirectory(dir)
 				}
@@ -154,7 +154,7 @@ java -Xmx512M -jar %s/hilda-%s.jar $*
 			
 			rv = Error.SUCCESS
 		} catch {
-		  	case e => log.error("Cannot install Hilda. " + e.toString())
+		  	case e => log.error("Cannot install Hilda. " + e.toString)
 		}
 		rv
 	}
@@ -174,7 +174,7 @@ java -Xmx512M -jar %s/hilda-%s.jar $*
 			home.mkdir()
 		}
 		
-		if(cli.readLine("Create new module? [y/n]: ").toLowerCase().compare("y")!=0){
+		if(cli.readLine("Create new module? [y/n]: ").toLowerCase.compare("y")!=0){
 			println("You can create module manually by editing `" + hildaModules + "`")
 			return
 		}

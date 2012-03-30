@@ -12,7 +12,7 @@ trait Executor extends WorkingDir {
     private lazy val SystemEnv = System.getenv()
 	protected lazy val ENV_VARS:Array[String] =
             (Array[String]("PATH=/bin:/usr/bin:/usr/local/bin:/opt/bin:/opt/local/bin") ++
-            SystemEnv.keySet().toArray().map { key =>
+            SystemEnv.keySet().toArray.map { key =>
                 "%s=%s".format(key, SystemEnv.get(key))
             });
 
@@ -54,6 +54,6 @@ trait Executor extends WorkingDir {
 			log.info(" > " + result)
 		}
 
-		return result
+		result
 	}
 }

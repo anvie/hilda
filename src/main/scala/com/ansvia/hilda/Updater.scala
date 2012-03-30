@@ -13,7 +13,7 @@ class Updater() {
     val modulesFile = Hilda.getHildaHome + "/modules.xml"
     var cachedModules: Array[IHildaModule] = null
 
-    def ensureConfig(): Unit = {
+    def ensureConfig() {
         val dirExists = (new File(Hilda.getHildaHome)).exists()
         if (!dirExists) {
             println("Directory `" + Hilda.getHildaHome + "` not exists")
@@ -34,10 +34,10 @@ class Updater() {
         } catch {
             case e: org.xml.sax.SAXParseException =>
                 log.error("Cannot parse xml")
-                log.error(e.toString())
+                log.error(e.toString)
         }
 
-        return data
+        data
     }
 
     def getModule(m: Node): IHildaModule = {
@@ -105,8 +105,23 @@ class Updater() {
                 }
         }.toArray
 
+        // get version
+        val version = (m \ "version" \ "@type").text match {
+            case "programatic" =>
+                val script = (m \ "version").text
+                ProgramaticVersionGetter(script,
+                    new Executor { setWorkingDir(workDir) },
+                    new OffensiveLogger{})
+            case _ =>
+                poller match {
+                    case p:GitPoller =>
+                        ModUiVersionGetter()
+                    case _ =>
+                        DefaultVersionGetter("-")
+                }
+        }
 
-        val mod = new StandardModule(this, name, depends, poller, workDir, hooks)
+        val mod = new StandardModule(this, name, depends, poller, workDir, hooks, version)
 
         val targets = (m \ "targets" \ "target")
         targets.map(t => TargetUtil.nodeToTarget(mod, t))
@@ -117,9 +132,9 @@ class Updater() {
     }
 
     def getModule(modName: String):IHildaModule = {
-        val modules = getModules()
+        val modules = getModules
         for (m <- modules) {
-            if (m.getName() == modName) {
+            if (m.getName == modName) {
                 return m
             }
         }
@@ -128,7 +143,7 @@ class Updater() {
 
     def moduleExists(modName:String):Boolean = { getModule(modName) != null }
 
-    def getModules(): Array[IHildaModule] = {
+    def getModules: Array[IHildaModule] = {
 
         if (cachedModules != null) {
             return cachedModules
@@ -147,11 +162,11 @@ class Updater() {
 
         cachedModules = rv
 
-        return rv
+        rv
     }
 
-    def printModules(): Unit = {
-        val modules = getModules()
+    def printModules() {
+        val modules = getModules
         if (modules == null || modules.length == 0) {
             println("No one modules found")
             println("If this is first time you are using Hilda, please install it first by typing:")
@@ -180,7 +195,7 @@ class Updater() {
             return Error.NOT_INITIALIZED
         }
 
-        val modules = getModules()
+        val modules = getModules
 
         if (modules == null || modules.length == 0) {
             log.error("No one modules loaded")
@@ -190,7 +205,7 @@ class Updater() {
         if (mods == null) {
             modules.foreach(z => z.selfUpdate())
         } else {
-            modules.filter(z => mods.contains(z.getName()))
+            modules.filter(z => mods.contains(z.getName))
                     .foreach(z => z.selfUpdate())
         }
 

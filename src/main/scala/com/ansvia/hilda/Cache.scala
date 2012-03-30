@@ -116,7 +116,7 @@ object Cache {
     var data:Elem = null
     lazy final val filePath = Hilda.getHildaHome + "/caches.xml"
     
-    def init_():Unit = {
+    def init_() {
 
         if (!initialized){
 

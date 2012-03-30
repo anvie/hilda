@@ -7,8 +7,13 @@ trait WorkingDir {
 	
 	def setWorkingDir(workDir:String):Int = { 
 		workingDir = new File(workDir)
-		return if (workingDir.exists()) WorkDirState.WORK_DIR_EXISTS else WorkDirState.WORK_DIR_UNINITIALIZED
+		if (workingDir.exists())
+            WorkDirState.WORK_DIR_EXISTS
+        else
+            WorkDirState.WORK_DIR_UNINITIALIZED
 	}
+
+    def getWorkingDir = workingDir.getCanonicalPath
 }
 
 object WorkDirState {

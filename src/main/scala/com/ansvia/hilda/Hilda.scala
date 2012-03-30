@@ -13,7 +13,7 @@ import ch.qos.logback.classic.LoggerContext
 
 object Hilda {
 
-    val VERSION = "0.0.9-dev"
+    val VERSION = "0.0.9c"
     val BANNER = """
 Hilda v""" + VERSION + """
 Copyright (C) 2011 Ansvia Inc.
@@ -38,7 +38,7 @@ Internal Ansvia modules updater.
             return Error.INVALID_PARAMETER
         }
         CUSTOM_HILDA_HOME = hildaHome
-        return Error.SUCCESS
+        Error.SUCCESS
     }
 
 
@@ -54,7 +54,7 @@ Internal Ansvia modules updater.
         System.exit(0)
     }
 
-    def main(args: Array[String]): Unit = {
+    def main(args: Array[String]) {
 
         /**
          * Setup logger.
@@ -236,9 +236,9 @@ Internal Ansvia modules updater.
 
                 case "state" =>
 
-                    val mods = Module.getModules()
+                    val mods = Module.getModules
                     mods foreach { mod =>
-                        println(" [ " + mod.getName() + " ] " + mod.getState())
+                        println(" [ " + mod.getName + " ] " + mod.getState)
                     }
 
                     rv = Error.SUCCESS

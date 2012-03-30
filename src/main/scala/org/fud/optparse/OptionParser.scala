@@ -345,7 +345,7 @@ class OptionParser {
   /** Same as calling help. */
   override def toString = help
   
-  protected def add_auto_help: Unit = {
+  protected def add_auto_help {
     if (auto_help && !switches.exists(s => s.names.short == "h" || s.names.long == "--help"))
       this.flag("-h", "--help", "Show this message") { () => println(this); sys.exit(0) }
   }
@@ -359,43 +359,52 @@ class OptionParser {
   def separator(text: String) = addSwitch(new Separator(text))
   
   /** Define a switch that takes no arguments. */
-  def flag(short: String, long: String, info: String*)(func: () => Unit): Unit =
-    addSwitch(new NoArgSwitch(getNames(short, long), info, func))
+  def flag(short: String, long: String, info: String*)(func: () => Unit) {
+      addSwitch(new NoArgSwitch(getNames(short, long), info, func))
+  }
 
   /**
    * Define a boolean switch.  
    * This switch takes no arguments.  The long form of the switch may be prefixed with no- to negate the switch.
    * For example a switch with long name  --expert could be specified as --no-expert on the command line. */
-  def bool(short: String, long: String, info: String*)(func: Boolean => Unit): Unit =
-    addSwitch(new BoolSwitch(getNames(short, long, true), info, func))
+  def bool(short: String, long: String, info: String*)(func: Boolean => Unit) {
+      addSwitch(new BoolSwitch(getNames(short, long, true), info, func))
+  }
 
   /** Define a switch that takes a required argument. */
-  def reqd[T](short: String, long: String, info: String*)(func: T => Unit)(implicit m: ClassManifest[T]): Unit =
-    addSwitch(new ArgSwitch(getNames(short, long), info, arg_parser(m), func))
+  def reqd[T](short: String, long: String, info: String*)(func: T => Unit)(implicit m: ClassManifest[T]) {
+      addSwitch(new ArgSwitch(getNames(short, long), info, arg_parser(m), func))
+  }
   
   /**  Define a switch that takes a required argument where the valid values are given by a Seq[]. */
-  def reqd[T](short: String, long: String, vals: Seq[T], info: String*)(func: T => Unit)(implicit m: ClassManifest[T]): Unit =
-    addSwitch(new ArgSwitchWithVals(getNames(short, long), info, new ValueList(vals), func))
+  def reqd[T](short: String, long: String, vals: Seq[T], info: String*)(func: T => Unit)(implicit m: ClassManifest[T]) {
+      addSwitch(new ArgSwitchWithVals(getNames(short, long), info, new ValueList(vals), func))
+  }
 
   /** Define a switch that takes a required argument where the valid values are given by a Map. */
-  def reqd[T](short: String, long: String, vals: Map[String, T], info: String*)(func: T => Unit)(implicit m: ClassManifest[T]): Unit =
-    addSwitch(new ArgSwitchWithVals(getNames(short, long), info, new ValueList(vals), func))
+  def reqd[T](short: String, long: String, vals: Map[String, T], info: String*)(func: T => Unit)(implicit m: ClassManifest[T]) {
+      addSwitch(new ArgSwitchWithVals(getNames(short, long), info, new ValueList(vals), func))
+  }
 
   /** Define a switch that takes an optional argument. */
-  def optl[T](short: String, long: String, info: String*)(func: Option[T] => Unit)(implicit m: ClassManifest[T]): Unit =
-    addSwitch(new OptArgSwitch(getNames(short, long), info, arg_parser(m), func))
+  def optl[T](short: String, long: String, info: String*)(func: Option[T] => Unit)(implicit m: ClassManifest[T]) {
+      addSwitch(new OptArgSwitch(getNames(short, long), info, arg_parser(m), func))
+  }
 
   /** Define a switch that takes an optional argument where the valid values are given by a Seq[]. */
-  def optl[T](short: String, long: String, vals: Seq[T], info: String*)(func: Option[T] => Unit)(implicit m: ClassManifest[T]): Unit =
-    addSwitch(new OptArgSwitchWithVals(getNames(short, long), info, new ValueList(vals), func))
+  def optl[T](short: String, long: String, vals: Seq[T], info: String*)(func: Option[T] => Unit)(implicit m: ClassManifest[T]) {
+      addSwitch(new OptArgSwitchWithVals(getNames(short, long), info, new ValueList(vals), func))
+  }
   
   /** Define a switch that takes an optional argument where the valid values are given by a Map. */
-  def optl[T](short: String, long: String, vals: Map[String, T], info: String*)(func: Option[T] => Unit)(implicit m: ClassManifest[T]): Unit =
-    addSwitch(new OptArgSwitchWithVals(getNames(short, long), info, new ValueList(vals), func))
+  def optl[T](short: String, long: String, vals: Map[String, T], info: String*)(func: Option[T] => Unit)(implicit m: ClassManifest[T]) {
+      addSwitch(new OptArgSwitchWithVals(getNames(short, long), info, new ValueList(vals), func))
+  }
   
   /** Define a switch that takes a comma separated list of arguments. */
-  def list[T](short: String, long: String, info: String*)(func: List[T] => Unit)(implicit m: ClassManifest[T]): Unit =
-    addSwitch(new ListArgSwitch(getNames(short, long), info, arg_parser(m), func))
+  def list[T](short: String, long: String, info: String*)(func: List[T] => Unit)(implicit m: ClassManifest[T]) {
+      addSwitch(new ListArgSwitch(getNames(short, long), info, arg_parser(m), func))
+  }
 
   
   /**
@@ -470,7 +479,7 @@ class OptionParser {
    *
    * If you add a parser for a type that already has a parser, the existing parser will be replaced.
    */
-  def addArgumentParser[T](f: String => T)(implicit m: ClassManifest[T]): Unit = {
+  def addArgumentParser[T](f: String => T)(implicit m: ClassManifest[T]) {
     val wrapped = { s: String =>
       try { f(s) } 
       catch { 
@@ -525,7 +534,7 @@ class OptionParser {
     // Called when this switch is detected on the command line.  Should handle the
     // invocation of the user's code to process this switch.
     //   negated param only used by BoolSwitch
-    def process(arg: Option[String], negated: Boolean): Unit = {}
+    def process(arg: Option[String], negated: Boolean) {}
     
     override lazy val toString = {
       val sw   = "    " + names
@@ -540,7 +549,9 @@ class OptionParser {
   }
   
   protected class NoArgSwitch(n: Names, d: Seq[String], func: () => Unit) extends Switch(n, d) {
-    override def process(arg: Option[String], negated: Boolean): Unit = func()
+    override def process(arg: Option[String], negated: Boolean) {
+        func()
+    }
   }
   
   protected class BoolSwitch(n: Names, d: Seq[String], func: Boolean => Unit) extends Switch(n, d) {
@@ -550,30 +561,38 @@ class OptionParser {
     // Return true if the given lname is a prefix match for our negated name.
     override def negatedMatch(lname: String) = names.longNegated.startsWith(lname)
     
-    override def process(arg: Option[String], negated: Boolean): Unit = func(!negated)
+    override def process(arg: Option[String], negated: Boolean) {
+        func(!negated)
+    }
   }
   
   protected class ArgSwitch[T](n: Names, d: Seq[String], parse_arg: String => T, func: T => Unit) extends Switch(n, d) {
     override val takesArg    = true
     override val requiresArg = true
     
-    override def process(arg: Option[String], negated: Boolean): Unit = arg match {
-      case None => throw new RuntimeException("Internal error - no arg for ArgSwitch")
-      case Some(a) => func(parse_arg(a))
+    override def process(arg: Option[String], negated: Boolean) {
+        arg match {
+            case None => throw new RuntimeException("Internal error - no arg for ArgSwitch")
+            case Some(a) => func(parse_arg(a))
+        }
     }
   }
 
   protected class OptArgSwitch[T](n: Names, d: Seq[String], parse_arg: String => T, func: Option[T] => Unit) extends Switch(n, d) {
     override val takesArg = true
-    override def process(arg: Option[String], negated: Boolean): Unit = func(arg.map(parse_arg))
+    override def process(arg: Option[String], negated: Boolean) {
+        func(arg.map(parse_arg))
+    }
   }
   
   protected class ListArgSwitch[T](n: Names, d: Seq[String], parse_arg: String => T, func: List[T] => Unit) extends Switch(n, d) {
     override val takesArg    = true
     override val requiresArg = true
-    override def process(arg: Option[String], negated: Boolean): Unit = arg match {
-      case None => throw new RuntimeException("Internal error - no arg for ListArgSwitch")
-      case Some(argList) => func(argList.split(",").toList.map(parse_arg))
+    override def process(arg: Option[String], negated: Boolean) {
+        arg match {
+            case None => throw new RuntimeException("Internal error - no arg for ListArgSwitch")
+            case Some(argList) => func(argList.split(",").toList.map(parse_arg))
+        }
     }
   }
     
@@ -597,26 +616,31 @@ class OptionParser {
     override val takesArg    = true
     override val requiresArg = true
     
-    override def process(arg: Option[String], negated: Boolean): Unit = arg match {
-      case None => throw new RuntimeException("Internal error - no arg for ArgSwitchWithVals")
-      case Some(a) => func(vals.get(a))
+    override def process(arg: Option[String], negated: Boolean) {
+        arg match {
+            case None => throw new RuntimeException("Internal error - no arg for ArgSwitchWithVals")
+            case Some(a) => func(vals.get(a))
+        }
     }
   }
 
   protected class OptArgSwitchWithVals[T](n: Names, d: Seq[String], vals: ValueList[T], func: Option[T] => Unit) extends Switch(n, d) {
     override val takesArg = true
-    override def process(arg: Option[String], negated: Boolean): Unit = func(arg.map(vals.get))
+    override def process(arg: Option[String], negated: Boolean) {
+        func(arg.map(vals.get))
+    }
   }
 
   // Add a new switch to the list.  If any existing switch has the same short or long name
   // as the new switch then it is first removed.  Thus a new switch can potentially replace
   // two existing switches.
-  protected def addSwitch(switch: Switch): Unit = {
-    def remove(p: Switch => Boolean): Unit = 
-      switches.findIndexOf(p) match {
-        case -1  =>
-        case idx => switches.remove(idx)
-      }
+  protected def addSwitch(switch: Switch) {
+    def remove(p: Switch => Boolean) {
+        switches.findIndexOf(p) match {
+            case -1 =>
+            case idx => switches.remove(idx)
+        }
+    }
     
     if (switch.names.short != "") remove(_.names.short == switch.names.short)
     if (switch.names.long  != "") remove(_.names.long  == switch.names.long)

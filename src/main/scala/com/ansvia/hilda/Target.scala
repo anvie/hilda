@@ -6,13 +6,13 @@ import scala.xml.Node
 
 sealed trait Target extends StatusWriter {
 	def execute()
-	def getName():String
+	def getName:String
 }
 
 sealed abstract class ModuleTarget(mod: StandardModule) extends Target with Executor {
 	private val log = LoggerFactory.getLogger(getClass)
 	override def status(msg: String) {
-		println("[" + mod.getName() + ":" + ID + "]: " + msg)
+		println("[" + mod.getName + ":" + ID + "]: " + msg)
 	}
 }
 
@@ -35,8 +35,8 @@ sealed class InlineTarget(mod: StandardModule, name: String, script: String, wor
 		
 		status("Done.")
 	}
-	override def toString() = name
-	def getName():String = name
+	override def toString = name
+	def getName:String = name
 }
 
 sealed class ExternalScriptTarget(mod: StandardModule, name: String, scriptLoc: String, workDir: String)
@@ -50,7 +50,7 @@ sealed class ExternalScriptTarget(mod: StandardModule, name: String, scriptLoc: 
 		exec(Array("sh", Hilda.getHildaHome + "/target_script/" + scriptLoc + ".sh"))
 	}
 	override def toString() = name
-	def getName():String = name
+	def getName:String = name
 }
 
 
@@ -60,12 +60,12 @@ object TargetUtil {
 		val scriptTag = (node \ "@script").text
 		var tWorkDir = (node \ "@workdir").text
 		if (tWorkDir.length == 0) {
-			tWorkDir = mod.getWorkDir()
+			tWorkDir = mod.getWorkDir
 		}
 		if (scriptTag.length > 0) {
 			return new ExternalScriptTarget(mod, name, scriptTag, tWorkDir)
 		}
 		val script = (node).text
-		return new InlineTarget(mod, name, script, tWorkDir)
+		new InlineTarget(mod, name, script, tWorkDir)
 	}
 }

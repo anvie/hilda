@@ -21,9 +21,9 @@ object GitCommander extends BaseCommander("git") {
             case CHBR =>
                 if (args.length > 1){
 
-                    Module.getModules().foreach { mod =>
+                    Module.getModules.foreach { mod =>
                         val br = cmds(1).trim()
-                        println("Set branch `%s` for `%s`...".format(br, mod.getName()))
+                        println("Set branch `%s` for `%s`...".format(br, mod.getName))
                         
                         mod.getPoller match {
                             case p:GitPoller =>
@@ -38,10 +38,10 @@ object GitCommander extends BaseCommander("git") {
             case PUSH =>
                 if (args.length > 2){
 
-                    Module.getModules().foreach { mod =>
+                    Module.getModules.foreach { mod =>
                         val origin = cmds(1).trim()
                         val br = cmds(2).trim()
-                        println("[%s] push `%s` -> `%s`...".format(mod.getName(), origin, br))
+                        println("[%s] push `%s` -> `%s`...".format(mod.getName, origin, br))
                         mod.getPoller match {
                             case p:GitPoller => p.push(origin, br)
                             case _ => println(mod.getPoller)
@@ -53,10 +53,10 @@ object GitCommander extends BaseCommander("git") {
             case PULL =>
                 if (args.length > 2){
 
-                    Module.getModules().foreach { mod =>
+                    Module.getModules.foreach { mod =>
                         val origin = cmds(1).trim()
                         val br = cmds(2).trim()
-                        println("[%s] pull `%s` <- `%s`...".format(mod.getName(), origin, br))
+                        println("[%s] pull `%s` <- `%s`...".format(mod.getName, origin, br))
                         mod.getPoller match {
                             case p:GitPoller => p.pull(origin, br)
                             case _ => println(mod.getPoller)
@@ -76,6 +76,6 @@ object GitCommander extends BaseCommander("git") {
                 rv = Error.SUCCESS
             case _ =>
         }
-        return rv
+        rv
     }
 }

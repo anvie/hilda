@@ -18,7 +18,7 @@ class BaseCommander(protected val prefix:String) extends Commander {
 object Commander {
     def processCommand(args:Array[String]):Int = {
         val rv = GitCommander.processCommand(args)
-        return rv
+        rv
     }
 }
 

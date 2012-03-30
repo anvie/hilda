@@ -35,11 +35,11 @@ case class HildaNode(routerHostName:String, port:Int, routerName:String, nodeNam
 								Config.node.getName,
 								Config.node.getHost,
 								Config.node.getPort,
-								Module.getModules().map(_.getName())
+								Module.getModules.map(_.getName)
 							)
 					
 					rv = (router !! msg.Register(me))
-					log.info("status: " + rv().toString())
+					log.info("status: " + rv().toString)
 					
 					//router ! msg.Command("listen")
 				
@@ -47,7 +47,7 @@ case class HildaNode(routerHostName:String, port:Int, routerName:String, nodeNam
 					log.info("unregistering node...")
 					// test unregister
 					rv = (router !! msg.Unregister(Config.node.getName, Config.node.getHost, Config.node.getPort))
-					log.info("status: " + rv().toString())
+					log.info("status: " + rv().toString)
 					
 				case "listening" =>
 					router ! msg.Command("listen")
@@ -57,7 +57,7 @@ case class HildaNode(routerHostName:String, port:Int, routerName:String, nodeNam
 					log.info("listing registered nodes...")
 					// list nodes
 					rv = (router !! msg.Command("ls-node"))
-					log.info("nodes: " + rv().toString())
+					log.info("nodes: " + rv().toString)
 				
 				case "stop" =>
 					log.info("stoping node `" + nodeName + "`")
@@ -105,10 +105,10 @@ case object NodeUtil extends StatusWriter {
 		
 		status("started.")
 		
-		return node
+		node
 	}
 	
 	def getRemoteNode(nodeHost:String, nodePort:Int, nodeName:String):AbstractActor = {
-		return select(Node(nodeHost, nodePort), Symbol(nodeName))
+		select(Node(nodeHost, nodePort), Symbol(nodeName))
 	}
 }

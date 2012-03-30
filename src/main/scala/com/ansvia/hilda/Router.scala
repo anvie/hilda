@@ -13,16 +13,16 @@ import scala.Serializable
 object msg {
 	
 	sealed abstract class Message
-	case class Update(val nodeName:String, val name:String) extends Message
-	case class Rollback(val modName:String) extends Message
-	case class Reply(val status:String) extends Message {
-		override def toString() = status
+	case class Update(nodeName:String, name:String) extends Message
+	case class Rollback(modName:String) extends Message
+	case class Reply(status:String) extends Message {
+		override def toString = status
 	}
 	case class Register(newNode:NodeRef) extends Message {
-		override def toString() = "[Node: " + newNode.getName + "]"
+		override def toString = "[Node: " + newNode.getName + "]"
 	}
 	case class Unregister(nodeName:String, nodeHost:String, nodePort:Int) extends Message {
-		override def toString() = "[Node: " + nodeName + "]"
+		override def toString = "[Node: " + nodeName + "]"
 	}
 	case class Command(cmd:String) extends Message
 
@@ -32,7 +32,7 @@ case class NodeRef(name:String, host:String, port:Int, modules:Array[String]) {
 	def getName = name
 	def getHost = host
 	def getPort = port
-	override def toString():String = "<Node:[%s@%s:%d]>".format(name, host, port)
+	override def toString:String = "<Node:[%s@%s:%d]>".format(name, host, port)
 }
 
 case class Router(ID:String, port:Int) extends Actor {
@@ -52,7 +52,7 @@ case class Router(ID:String, port:Int) extends Actor {
 					
 					// broadcast to all nodes
 					
-					log.info("nodes.length = " + nodes.length.toString())
+					log.info("nodes.length = " + nodes.length.toString)
 					
 					nodes
 					.filter(n => n.getName == nodeName && n.modules.contains(modName))
@@ -92,7 +92,7 @@ case class Router(ID:String, port:Int) extends Actor {
 					log.info("Received command `" + cmd + "`")
 					cmd match {
 						case "ls-node" =>
-							reply(new msg.Reply( if(nodes.length > 0) nodes.map(_.name.toString()).reduce(_+ ", " + _) else "<empty>" ))
+							reply(new msg.Reply( if(nodes.length > 0) nodes.map(_.name.toString).reduce(_+ ", " + _) else "<empty>" ))
 						case "listen" =>
 							log.info("some node is now listening.")
 					}
@@ -129,7 +129,7 @@ case object RouterUtil extends StatusWriter {
 		
 		cached += cacheKey -> router
 		
-		return router
+		router
 	}
 
 	

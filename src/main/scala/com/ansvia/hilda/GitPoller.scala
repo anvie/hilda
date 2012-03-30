@@ -39,6 +39,8 @@ case class GitPoller(gitUri:String, branch:String)
         rv
     }
 
+
+
     def updateAvailable():Boolean = {
 
         if(cachedUpdateAvailable == true) return true
@@ -111,9 +113,9 @@ case class GitPoller(gitUri:String, branch:String)
             }
             if(notFound){
 
-                println("Branch doesn't exists `" + br + "` for `" + this.mod.getName() + "`")
+                println("Branch doesn't exists `" + br + "` for `" + this.mod.getName + "`")
 
-                lazy val cacheKey = "chbr-last-fetch-" + this.mod.getName()
+                lazy val cacheKey = "chbr-last-fetch-" + this.mod.getName
 
                 if (cached) {
                     // check from cache
@@ -203,7 +205,7 @@ case class GitPoller(gitUri:String, branch:String)
     }
 
     def getCurrentStatusList:Seq[String] = {
-        info("Getting module status for `%s`...".format(this.mod.getName()))
+        info("Getting module status for `%s`...".format(this.mod.getName))
         val rv = exec("git status")
         val modified = if (rv.contains("modified"))
             "true"

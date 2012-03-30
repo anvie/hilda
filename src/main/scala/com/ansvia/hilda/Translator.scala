@@ -11,7 +11,9 @@ trait Translator extends {
 	private var dataSet:HashMap[String, String] = null
 	private val log = LoggerFactory.getLogger(getClass)
 
-	def setDataset(data:HashMap[String, String]) = dataSet = data
+	def setDataset(data:HashMap[String, String]) {
+        dataSet = data
+    }
 	protected def validValue(value:String):Boolean = { value.startsWith("${") && value.endsWith("}") }
 	def translate(value:String, safe:Boolean=false):String = {
 		
@@ -26,13 +28,13 @@ trait Translator extends {
 		}
 		
 		// extract
-		var key = value.substring(2, value.length() - 1)
+        val key = value.substring(2, value.length() - 1)
 		val rv = dataSet(key)
-		return rv
+		rv
 	}
 	
 	/**
-	 * @TODO: make it better
+	 * //@TODO(*): make it better
 	 */
 	def translateAll(input:String):String = {
 		if(dataSet == null)
@@ -48,6 +50,6 @@ trait Translator extends {
 			rv :+= replaced.trim()
 		}
 		
-		return rv.reduce(_+ "\n" +_)
+		rv.reduce(_+ "\n" +_)
 	}
 }

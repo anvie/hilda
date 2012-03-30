@@ -16,6 +16,9 @@ import com.ansvia.hilda.{ILogger, GitPoller, Hilda, Updater}
 
 class MainWindow extends SimpleSwingApplication {
 
+    lazy val upd = new Updater()
+    var modules = Array[IModuleUi]() 
+
     case class Logger(txt:TextArea) extends ILogger {
         def info(msg:String){ print("INFO: " + msg + "\n") }
         def error(msg:String){ print("ERROR: " + msg + "\n") }
@@ -23,6 +26,14 @@ class MainWindow extends SimpleSwingApplication {
         def warn(msg:String){ print("WARN: " + msg + "\n") }
         def print(msg:String){
             txt.append(msg)
+        }
+    }
+    
+    def loadModules(log0:ILogger) {
+        modules = upd.getModules.map { m =>
+            val mui = GitModule(m)
+            mui.setLogger(log0)
+            mui
         }
     }
 
@@ -34,28 +45,40 @@ class MainWindow extends SimpleSwingApplication {
         lazy val btnHelp = new Button("Tolong")
         lazy val btnRefresh = new Button("Segarkan")
 
-        lazy val upd = new Updater()
         lazy val txtLog = new TextArea(5, 40){editable = false}
         lblStatus.horizontalAlignment = Alignment.Left
 
         val log = Logger(txtLog)
 
+        loadModules(log)
+
         //case class Module(name:String, branch:String, modified:Boolean)
-        val model = upd.getModules().map{ m =>
-            val p = m.getPoller.asInstanceOf[GitPoller]
-            p.setLogger(log)
-            List(m.getName(),p.asInstanceOf[GitPoller].getCurrentBranch,true).toArray
-            val Seq(branch, modified) = p.getCurrentStatusList
-            List(m.getName(), branch, modified).toArray[Any]
+        val model = modules.map{ m =>
+            val Seq(branch, modified) = m.getState
+
+            var version = m.getVersion
+            if (version == "-"){
+                // get version from central module config files
+                version = m.getRawModule.getVersion
+            }
+                
+            List(m.getName, version, branch, if (modified=="true"){ "modified" }else{ "-" } ).toArray[Any]
         }
 
-        object lstModules extends Table(model, Array("Name", "Branch", "Modified")){
+        object tblMods extends Table(model, Array("Name", "Version", "Branch", "Modified")){
             focusable = false
         }
+        object txtModInfo extends TextArea(15, 10){ editable = false }
+
+        tblMods.selection.elementMode = Table.ElementMode.Row
+
+        listenTo(tblMods.selection)
 
         contents.append(
             new FlowPanel(FlowPanel.Alignment.Left)(lblStatus),
-            new ScrollPane(lstModules),
+            new BoxPanel(Orientation.Horizontal){
+                contents.append(new ScrollPane(tblMods), new ScrollPane(txtModInfo))
+            },
             new ScrollPane(txtLog),
             new FlowPanel(FlowPanel.Alignment.Left)(btnRefresh),
             new FlowPanel(FlowPanel.Alignment.Right)(btnHelp, btnExit))
@@ -71,6 +94,19 @@ class MainWindow extends SimpleSwingApplication {
                     case "Tolong" =>
                         lblStatus.text = "Status: help"
                 }
+            case TableRowsSelected(_, range, false) =>
+                //log.info("row: " + lstModules.selection.rows.anchorIndex.toString)
+                val sel = tblMods.selection.cells.toArray.apply(0)
+                log.info("cells: " + sel)
+                val v = tblMods.model.getValueAt(sel._1, 0)
+
+                log.info(v.toString)
+                val mod = upd.getModule(v.toString)
+
+                txtModInfo.text = mod.getName
+
+            //case TableColumnsSelected(_, range, false) =>
+            //    log.info(range.toString())
         }
 
     }
