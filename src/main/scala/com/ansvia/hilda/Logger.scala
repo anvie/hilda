@@ -44,7 +44,9 @@ trait Slf4jLogger extends ILogger {
         log.warn(msg)
     }
 
-    def print(msg: String){}
+    def print(msg: String){
+        System.out.print(msg)
+    }
 }
 
 trait OffensiveLogger extends ILogger {

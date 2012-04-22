@@ -40,6 +40,11 @@ class Updater() {
         data
     }
 
+    /**
+     * Get hilda module by xml node.
+     * @param m xml node of module.
+     * @return HildaModule or null if fail.
+     */
     def getModule(m: Node): IHildaModule = {
         val name = (m \ "@name").text
 
