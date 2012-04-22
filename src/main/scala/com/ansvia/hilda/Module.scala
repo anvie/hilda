@@ -75,6 +75,16 @@ case class RemoteModule(name:String, nodeName:String, nodeHost:String) extends H
     def getVersion:String = "-"
 }
 
+/**
+ * Standard / local module.
+ * @param updater the Updater engine.
+ * @param name Module name
+ * @param depends depends on (module name list).
+ * @param poller Poller
+ * @param workDir Workdir
+ * @param hooks Hooks engine.
+ * @param version Module version getter.
+ */
 case class StandardModule(updater: Updater,
 	name: String, depends: Array[String],
 	poller: IPoller, workDir: String, hooks: Array[Hook],
@@ -175,9 +185,13 @@ case class StandardModule(updater: Updater,
                 "**unknown**".format(getName)
         }
         state
-    } 
-        
+    }
 
+
+    /**
+     * Do self update action.
+     * this method called when `hilda update`
+     */
 	def selfUpdate() {
 	  
 		//log.info("selfUpdate(): " + name);

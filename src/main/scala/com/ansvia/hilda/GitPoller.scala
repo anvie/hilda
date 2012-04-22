@@ -15,6 +15,7 @@ case class GitPoller(gitUri:String, branch:String)
     var newCommit:String = ""
     var localCommit:String = ""
     var cachedUpdateAvailable = false
+    private final var forceUpdate = false
 
     if (!isLoggerReady){
         // if no any logger binded yet use Slf4jLogger as default.
@@ -76,14 +77,36 @@ case class GitPoller(gitUri:String, branch:String)
         newCommit
     }
 
+    def setForceUpdate(state:Boolean){
+        this.forceUpdate = state
+    }
+
+    /**
+     * Update current working tree.
+     * @return boolean
+     */
     def updateWorkTree():Boolean = {
 
         if(updateAvailable() == false) return false
 
         try {
 
-            exec("git checkout " + branch)
-            exec("git pull " + gitUri + " " + branch)
+            var rv:String = ""
+            if (this.forceUpdate)
+                rv = exec("git checkout -f " + branch)
+            else
+                rv = exec("git checkout " + branch)
+
+            if (rv.contains("error")){
+                log.error("Cannot update working tree, cannot checkout. " + rv)
+                return false
+            }
+            rv = exec("git pull " + gitUri + " " + branch)
+
+            if (rv.contains("error")){
+                log.error("Cannot update working tree, cannot pull. " + rv)
+                return false
+            }
 
         } catch {
             case e: IOException =>

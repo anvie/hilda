@@ -78,6 +78,9 @@ class Updater() {
                     poller = GitPoller(uri, "master")
                 }
 
+                poller.asInstanceOf[GitPoller].setForceUpdate( (m \\ "source" \ "@forceupdate").text == "true" )
+                //println( name + """ > (m \\ "source" \ "@forceupdate").text == """ + ((m \\ "source" \ "@forceupdate").text == "true").toString)
+
             case "rsync" =>
 
                 var rsyncSource: RsyncSource = null
