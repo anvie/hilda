@@ -1,19 +1,16 @@
 
 package com.ansvia.hilda
 
-import java.io.File
-import scala.xml._
+import java.io._
 import scala.collection.immutable.Map
 import org.fud.optparse.OptionParser
 import org.slf4j.LoggerFactory
 import ch.qos.logback.classic.joran.JoranConfigurator
 import ch.qos.logback.classic.LoggerContext
-//import sun.misc.Signal
-//import sun.misc.SignalHandler
 
 object Hilda {
 
-    val VERSION = "0.0.10"
+    val VERSION = "0.0.11b"
     val BANNER = """
 Hilda v""" + VERSION + """
 Copyright (C) 2011 Ansvia Inc.
@@ -33,7 +30,7 @@ Internal Ansvia modules updater.
             System.err.println("[ERROR] Directory `%s` does not exists".format(hildaHome))
             return Error.INVALID_PARAMETER
         }
-        if(!hdh.isDirectory()){
+        if(!hdh.isDirectory){
             System.err.println("[ERROR] `%s` isn't a directory".format(hildaHome))
             return Error.INVALID_PARAMETER
         }
@@ -59,10 +56,11 @@ Internal Ansvia modules updater.
         /**
          * Setup logger.
          */
-        val context = LoggerFactory.getILoggerFactory().asInstanceOf[LoggerContext]
+        val context = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
         val configurator = new JoranConfigurator()
-        configurator.setContext(context);
-        context.reset();
+        configurator.setContext(context)
+        context.reset()
+
         val logConfigFile = new File(HILDA_HOME + "/log-config-simple.xml")
         if (logConfigFile.exists()) {
             configurator.doConfigure(logConfigFile)
@@ -70,7 +68,8 @@ Internal Ansvia modules updater.
 
         val log = LoggerFactory.getLogger(getClass)
 
-        var options = Map[Symbol, Any]('modules -> false,
+        var options = Map[Symbol, Any](
+            'modules -> false,
             'help -> false,
             'asRouter -> false,
             'routerPort -> 4912,
@@ -111,7 +110,7 @@ Internal Ansvia modules updater.
 
         try {
             cli.parse(args)
-        }catch{case e =>
+        }catch{case e:Exception =>
             System.err.println(e.getMessage)
             System.exit(Error.INVALID_PARAMETER)
         }
@@ -174,6 +173,7 @@ Internal Ansvia modules updater.
         if (args.length > 0) {
             args.toList(0) match {
                 case "update" =>
+                    println("Updating modules...")
                     args.length match {
                         case 1 => rv = engine.doAction()
                         case 2 =>
@@ -181,6 +181,45 @@ Internal Ansvia modules updater.
                             println("Updating only for these modules:")
                             println("=> " + modNames.reduce(_ + ", " + _))
                             engine.doAction(modNames)
+                    }
+                    rv = Error.SUCCESS
+
+                case "upgrade" =>
+
+                    val force = {
+                        if (args.length > 1){
+                            args(1) == "force"
+                        }else false
+                    }
+                    var oldVersion = ""
+                    val versionFile = new File(HILDA_HOME + "/version")
+                    if (versionFile.exists()){
+                        oldVersion = (new BufferedReader(new FileReader(versionFile))).readLine()
+                        if (oldVersion != null){
+                            oldVersion = oldVersion.trim
+                        }else{
+                            oldVersion = ""
+                        }
+                    }
+
+                    if (oldVersion.length == 0){
+                        oldVersion = "unknown"
+                    }
+
+                    if (oldVersion == VERSION && !force){
+                        println("You already have the latest version of Hilda (" + VERSION + ")")
+                        println("Add parameter `force` to force upgrade.")
+                    }
+                    else {
+                        println("Upgrading hilda version " + oldVersion + " to " + VERSION)
+
+                        Initializer.upgrade()
+
+
+                        val versionWriter = new FileWriter(versionFile)
+                        versionWriter.write(VERSION)
+                        versionWriter.flush()
+                        versionWriter.close()
                     }
                     rv = Error.SUCCESS
 
@@ -218,6 +257,15 @@ Internal Ansvia modules updater.
                         rv = Error.NOT_INITIALIZED
                     }
                     else {
+
+                        if (args.length > 1){
+                            if (args(1).startsWith("--hilda-home=")){
+                                setHildaHome(args(1).substring(13))
+                            }
+                        }
+
+                        println("Hilda Home set to: " + getHildaHome)
+
                         Initializer.ensureHildaHome()
 
                         Initializer.CoverError {

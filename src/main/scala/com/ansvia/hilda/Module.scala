@@ -165,7 +165,7 @@ case class StandardModule(updater: Updater,
 			return
 		}
 
-		var alreadyExecutedTargets: Array[String] = Array[String]()
+        val alreadyExecutedTargets: Array[String] = Array[String]()
 
 		def notAlreadyExecuted(t: String): Boolean = !alreadyExecutedTargets.contains(t)
 
@@ -202,7 +202,7 @@ case class StandardModule(updater: Updater,
 
 		if (depends.length > 0) {
 			for (mn <- depends) {
-				var mod = updater.getModule(mn)
+                val mod = updater.getModule(mn)
 				if (mod == null) {
 					throw new Exception("Invalid dependency module `" + mn + "`, cannot execute depens module")
 				}

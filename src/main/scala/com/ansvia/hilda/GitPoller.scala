@@ -41,7 +41,11 @@ case class GitPoller(gitUri:String, branch:String)
     }
 
 
-
+    /**
+     * Check whether update is available from
+     * git repository.
+     * @return
+     */
     def updateAvailable():Boolean = {
 
         if(cachedUpdateAvailable == true) return true
@@ -70,6 +74,10 @@ case class GitPoller(gitUri:String, branch:String)
         rv
     }
 
+    /**
+     * Get latest changes.
+     * @return
+     */
     def getNewChanges():String = {
         if(newCommit.length == 0){
             updateAvailable()
@@ -77,6 +85,10 @@ case class GitPoller(gitUri:String, branch:String)
         newCommit
     }
 
+    /**
+     * Set to force update.
+     * @param state
+     */
     def setForceUpdate(state:Boolean){
         this.forceUpdate = state
     }
@@ -117,11 +129,20 @@ case class GitPoller(gitUri:String, branch:String)
         true
     }
 
+    /**
+     * Get current active branch on current module.
+     * @return
+     */
     def getCurrentBranch = {
         val rv = exec("git status")
         rv.split("\n")(0).split(" ")(3).trim()
     }
 
+    /**
+     * Set active branch.
+     * @param br branch name.
+     * @param cached if true then don't fetch from remote repo if no branch exists.
+     */
     def setBranch(br:String, cached:Boolean=true){
         val branch = getCurrentBranch
         if (branch != br){

@@ -8,9 +8,9 @@ import org.apache.commons.io.FileUtils
 object Initializer {
 	
 	private val log = LoggerFactory.getLogger(getClass)
-	private val DEFAULT_INSTALL_PREFIX = "/usr/local";
-	private val DEFAULT_LIB_DIR = DEFAULT_INSTALL_PREFIX + "/lib";
-	private val DEFAULT_BIN_DIR = DEFAULT_INSTALL_PREFIX + "/bin";
+	private val DEFAULT_INSTALL_PREFIX = "/usr/local"
+	private val DEFAULT_LIB_DIR = DEFAULT_INSTALL_PREFIX + "/lib"
+	private val DEFAULT_BIN_DIR = DEFAULT_INSTALL_PREFIX + "/bin"
 	
 	class Module(name:String, depends:String, repo:String, branch:String, workDir:String) {
 		def toXML():String = {
@@ -42,11 +42,12 @@ object Initializer {
 </hilda>
 """, modules.map(z => z.toXML()).reduceLeft(_ + _))
 		tmpl
-	};
+	}
 	
 	def CoverError(fragileOp: => Unit) {
 	  try { fragileOp }catch{
-	    case e => System.err.println("Cannot install hilda. " + e.getMessage)
+	    case e:Exception =>
+            System.err.println("Cannot install hilda. " + e.getMessage)
 	  }
 	}
 	
@@ -75,14 +76,14 @@ object Initializer {
 		}
 	}
 	
-	def installScript():Int = {
+	def installScript(quiet:Boolean=false):Int = {
 		var rv = Error.UNKNOWN_ERROR
 		
 		CoverError {
 		  
-			val curJarFile = new File(getClass.getProtectionDomain().getCodeSource().getLocation().getPath())
+			val curJarFile = new File(getClass.getProtectionDomain.getCodeSource.getLocation.getPath)
 			
-			println("Copying `" + curJarFile + "` into `" + DEFAULT_LIB_DIR + "`")
+			log.debug("Copying `" + curJarFile + "` into `" + DEFAULT_LIB_DIR + "`")
 			
 			val libDir = new File(DEFAULT_LIB_DIR)
 			
@@ -90,10 +91,10 @@ object Initializer {
 				libDir.mkdirs()
 			}
 			
-			val outJarFile = new File(libDir.getAbsolutePath() + "/hilda-" + Hilda.VERSION + ".jar")
+			val outJarFile = new File(libDir.getAbsolutePath + "/hilda-" + Hilda.VERSION + ".jar")
 			
 			// just skip it when target is already in /usr/local/lib
-			if(curJarFile.getAbsolutePath().compare(outJarFile.getAbsolutePath()) != 0){ 
+			if(curJarFile.getAbsolutePath.compare(outJarFile.getAbsolutePath) != 0){
 			   FileUtils.copyFile(curJarFile, outJarFile)
 			}
 
@@ -103,21 +104,21 @@ object Initializer {
 java -Xmx512M -jar %s/hilda-%s.jar $*
 """.format(DEFAULT_LIB_DIR, Hilda.VERSION)
 			
-			val binDir = new File("/usr/local/bin")
+			val binDir = new File(DEFAULT_BIN_DIR)
 			
 			if(!binDir.exists()){
 				binDir.mkdirs()
 			}
-			val hildaBin = binDir.getAbsolutePath() + "/hilda"
+			val hildaBin = binDir.getAbsolutePath + "/hilda"
 			
 			val f = new FileWriter(hildaBin)
 			f.write(tmpl)
 			f.close()
 			
-			Runtime.getRuntime().exec(Array("chmod", "+x", hildaBin))
+			Runtime.getRuntime.exec(Array("chmod", "+x", hildaBin))
 			
-			println("Hilda executable placed on `" + binDir.getAbsolutePath() + "`")
-			println("Ensure `" + binDir.getAbsolutePath() + "` is in your PATH environment variable.")
+			println("Hilda executable placed on `" + binDir.getAbsolutePath + "`")
+			println("Making sure `" + binDir.getAbsolutePath + "` is in your PATH environment variable.")
 			
 			rv = Error.SUCCESS
 			
@@ -154,7 +155,8 @@ java -Xmx512M -jar %s/hilda-%s.jar $*
 			
 			rv = Error.SUCCESS
 		} catch {
-		  	case e => log.error("Cannot install Hilda. " + e.toString)
+		  	case e:Exception =>
+                  log.error("Cannot install Hilda. " + e.toString)
 		}
 		rv
 	}
@@ -164,7 +166,7 @@ java -Xmx512M -jar %s/hilda-%s.jar $*
 		println("========| Module wizard")
 		var modules:Set[Module] = Set()
 		var again:String = null
-		var cli = new jline.ConsoleReader()
+        val cli = new jline.ConsoleReader()
 		
 		val hildaModules = Hilda.getHildaHome + "/modules.xml"
 		
@@ -246,17 +248,30 @@ java -Xmx512M -jar %s/hilda-%s.jar $*
 	<verbosity>1</verbosity>
 </hilda>
 """
-		var cli = new jline.ConsoleReader() 
-		val asMaster = cli.readLine("As master? [y/n]: ")
+        //val cli = new jline.ConsoleReader()
+		//val asMaster = cli.readLine("As master? [y/n]: ")
 		val f = new FileWriter(Hilda.getHildaHome + "/config.xml")
 		f.write(tmpl)
 		f.close()
 	}
-	
-	/*
-	def main(args: Array[String]) {
-		generateModuleXml()
-	}
-	*/
+
+    /**
+     * to upgrade hilda.
+     */
+    def upgrade(){
+
+        try {
+            val binDir = new File(DEFAULT_BIN_DIR)
+            val hildaBin = binDir.getAbsolutePath + "/hilda"
+
+            (new File(hildaBin)).delete()
+        }catch{
+            case e:Exception =>
+                e.printStackTrace()
+        }
+
+        this.installScript()
+
+    }
 
 }
