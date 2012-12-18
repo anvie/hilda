@@ -46,10 +46,10 @@ sealed class ExternalScriptTarget(mod: StandardModule, name: String, scriptLoc: 
 	override val ID = name
 	def execute() {
 		status("Executing...")
-		setWorkingDir(mod.translate(workDir, true))
+		setWorkingDir(mod.translate(workDir, safe = true))
 		exec(Array("sh", Hilda.getHildaHome + "/target_script/" + scriptLoc + ".sh"))
 	}
-	override def toString() = name
+	override def toString = name
 	def getName:String = name
 }
 

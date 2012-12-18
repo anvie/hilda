@@ -2,7 +2,11 @@ package com.ansvia.hilda
 
 import java.io.IOException
 
-
+/**
+ * Git poller engine.
+ * @param gitUri git URI.
+ * @param branch git branch.
+ */
 case class GitPoller(gitUri:String, branch:String)
         extends IPoller
         with Executor
@@ -16,6 +20,7 @@ case class GitPoller(gitUri:String, branch:String)
     var localCommit:String = ""
     var cachedUpdateAvailable = false
     private final var forceUpdate = false
+//    var quiet = false
 
     if (!isLoggerReady){
         // if no any logger binded yet use Slf4jLogger as default.
@@ -23,18 +28,33 @@ case class GitPoller(gitUri:String, branch:String)
         log = slf4log
     }
 
+    /**
+     * set current poller working dir
+     * if directory doesn't exists then create it first
+     * directory creation is recursive.
+     * @param workDir working directory path.
+     * @return
+     */
     override def setWorkingDir(workDir:String):Int = {
         super.setWorkingDir(workDir)
         var rv = WorkDirState.WORK_DIR_EXISTS
         if(!workingDir.exists()){
-            //throw new Exception("Working dir `" + workDir + "` does not exists")
-            val cli = new jline.ConsoleReader()
-            val createNew = cli.readLine("    Working dir `" + workDir + "` does not exists, create new? [y/n] ")
-            createNew.toLowerCase match {
-                case "y" =>
-                    status("Cloning...")
-                    exec("git clone " + gitUri + " " + workDir)
-                    rv = WorkDirState.WORK_DIR_JUST_CREATED
+
+            if (mod.isQuiet){
+                status("Cloning...")
+                exec("git clone " + gitUri + " " + workDir)
+                rv = WorkDirState.WORK_DIR_JUST_CREATED
+            }else{
+                val cli = new jline.ConsoleReader()
+                val createNew = cli.readLine("    Working dir `" + workDir + "` does not exists, create new? [y/n] ")
+                createNew.toLowerCase match {
+                    case "y" =>
+                        status("Cloning...")
+                        exec("git clone " + gitUri + " " + workDir)
+                        rv = WorkDirState.WORK_DIR_JUST_CREATED
+                    case _ =>
+                        status("Aborted.")
+                }
             }
         }
         rv
@@ -87,7 +107,7 @@ case class GitPoller(gitUri:String, branch:String)
 
     /**
      * Set to force update.
-     * @param state
+     * @param state state
      */
     def setForceUpdate(state:Boolean){
         this.forceUpdate = state
@@ -104,9 +124,10 @@ case class GitPoller(gitUri:String, branch:String)
         try {
 
             var rv:String = ""
-            if (this.forceUpdate)
+            if (this.forceUpdate){
                 rv = exec("git checkout -f " + branch)
-            else
+                rv = exec("git reset --hard HEAD")
+            }else
                 rv = exec("git checkout " + branch)
 
             if (rv.contains("error")){
@@ -240,7 +261,7 @@ case class GitPoller(gitUri:String, branch:String)
         }
     }
 
-    def getCurrentStatus():String = {
+    def getCurrentStatus:String = {
         // bellow line used for test only, show some environment variable
         // inside of /tmp/test.sh: echo $SOME_VAR
         //println(exec(Array("sh","/tmp/test.sh")))

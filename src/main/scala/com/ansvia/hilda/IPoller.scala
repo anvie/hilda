@@ -11,7 +11,7 @@ trait IPoller {
 
 	def updateAvailable():Boolean
 	def updateWorkTree():Boolean
-	def getNewChanges():String
+	def getNewChanges:String
 	def updateInfo() {
 		//status("New update available for `" + name + "` on branch `" + br + "`")
 		//status("New commit: " + poller.getNewChanges(workDir))

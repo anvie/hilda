@@ -10,7 +10,7 @@ import ch.qos.logback.classic.LoggerContext
 
 object Hilda {
 
-    val VERSION = "0.0.11b"
+    val VERSION = "0.0.14"
     val BANNER = """
 Hilda v""" + VERSION + """
 Copyright (C) 2011 Ansvia Inc.
@@ -76,7 +76,8 @@ Internal Ansvia modules updater.
             'routerName -> "hilda",
             'node -> false,
             'hildaHome -> HILDA_HOME,
-            'hildaVersion -> false)
+            'hildaVersion -> false,
+            'quietMode -> false)
 
         val cli = new OptionParser()
         cli.banner = BANNER
@@ -104,8 +105,12 @@ Internal Ansvia modules updater.
             setHildaHome(v)
         }
 
-        cli.flag("","--version", "Show Hilda version and exit") { () =>
+        cli.flag("","--version", "Show Hilda version and exit.") { () =>
             options += 'hildaVersion -> true
+        }
+
+        cli.flag("","--quiet", "Quiet mode, never ask for anything.") { ()=>
+            options += 'quietMode -> true
         }
 
         try {
@@ -129,6 +134,9 @@ Internal Ansvia modules updater.
 
         val engine = new Updater()
         engine.ensureConfig()
+
+//        println("options('quietMode): " + (options('quietMode) == true))
+        engine.setQuiet(options('quietMode) == true)
 
         log.info("Using hilda home: `%s`".format(getHildaHome))
 
@@ -174,9 +182,9 @@ Internal Ansvia modules updater.
             args.toList(0) match {
                 case "update" =>
                     println("Updating modules...")
-                    args.length match {
+                    args.filter(_.startsWith("--")==false).length match {
                         case 1 => rv = engine.doAction()
-                        case 2 =>
+                        case e:Int if e >= 2 =>
                             val modNames = args.toList(1).split(",")
                             println("Updating only for these modules:")
                             println("=> " + modNames.reduce(_ + ", " + _))

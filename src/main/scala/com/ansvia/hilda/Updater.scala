@@ -7,11 +7,20 @@ import scala.xml.Node
 
 
 class Updater() {
+
+
     private val log = LoggerFactory.getLogger(getClass)
 
     var initialized: Boolean = false
     val modulesFile = Hilda.getHildaHome + "/modules.xml"
     var cachedModules: Array[IHildaModule] = null
+
+
+    private var quiet = false
+    def setQuiet(state: Boolean){
+        quiet = state
+    }
+
 
     def ensureConfig() {
         val dirExists = (new File(Hilda.getHildaHome)).exists()
@@ -129,7 +138,8 @@ class Updater() {
                 }
         }
 
-        val mod = new StandardModule(this, name, depends, poller, workDir, hooks, version)
+        val mod = new StandardModule(this, name, depends, poller, workDir,
+            hooks, version, (m \ "@quiet").text == "true" || quiet)
 
         val targets = (m \ "targets" \ "target")
         targets.map(t => TargetUtil.nodeToTarget(mod, t))

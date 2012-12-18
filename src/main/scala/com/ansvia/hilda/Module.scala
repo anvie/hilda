@@ -3,6 +3,7 @@ import scala.collection.mutable.Stack
 import org.slf4j.LoggerFactory
 import scala.collection.mutable.HashMap
 import scala.actors.remote.RemoteActor
+import collection.mutable
 
 
 object DgModuleSyncronizer {
@@ -27,12 +28,23 @@ trait IHildaModule {
 	def getState:String
 	def getPoller:IPoller
     def getVersion:String
+    def setQuiet(state:Boolean)
+    def isQuiet:Boolean
 }
 
 abstract class HildaModule(name:String) extends IHildaModule with MutableLogger {
 	def status(msg: String) {
 		log.print(" + [Mod][" + name + "]: " + msg + "\n")
 	}
+
+    private var quiet = false
+
+    def setQuiet(state: Boolean) {
+        quiet = state
+    }
+
+    def isQuiet = quiet
+
 }
 
 
@@ -88,7 +100,8 @@ case class RemoteModule(name:String, nodeName:String, nodeHost:String) extends H
 case class StandardModule(updater: Updater,
 	name: String, depends: Array[String],
 	poller: IPoller, workDir: String, hooks: Array[Hook],
-    version:IVersionGetter)
+    version:IVersionGetter,
+    quietMode:Boolean=false)
 		extends HildaModule(name) 
 		with Translator
         with MutableLogger {
@@ -100,12 +113,13 @@ case class StandardModule(updater: Updater,
     }
     
 	poller.setModule(this)
+    setQuiet(quietMode)
 	
 	val workDirState = poller.asInstanceOf[Executor].setWorkingDir(workDir)
 
 	var targets = List[Target]()
 
-	val dataSet = HashMap[String, String](
+	val dataSet = mutable.HashMap[String, String](
 		"name" -> name,
 		"depends" -> (if (depends.length > 0) depends.reduce(_ + ", " + _); else ""),
 		"work.dir" -> workDir)
@@ -220,7 +234,7 @@ case class StandardModule(updater: Updater,
 
 			updateAvailable = true
 
-            val changes: String = poller.getNewChanges()
+            val changes: String = poller.getNewChanges
 			if (changes != null) {
 				status("Update available. rev: `%s`.".format(changes))
 				status("Updating now...")
@@ -272,7 +286,7 @@ case class StandardModule(updater: Updater,
 
             updateAvailable = true
 
-            val changes: String = poller.getNewChanges()
+            val changes: String = poller.getNewChanges
             if (changes != null) {
                 callback("Update available. rev: `%s`.".format(changes))
                 callback("Updating now...")

@@ -58,10 +58,10 @@ class ScriptedHook(when:String, content:String) extends Hook with Beautifier {
 			f.write(beautifyContent(content))
 			f.close()
 
-			val rt = Runtime.getRuntime()
+			val rt = Runtime.getRuntime
 			val proc = rt.exec("sh " + HILDA_HOOK_SCRIPT)
-			val stdOut = new BufferedReader(new InputStreamReader(proc.getInputStream()))
-			val stdErr = new BufferedReader(new InputStreamReader(proc.getErrorStream()))
+			val stdOut = new BufferedReader(new InputStreamReader(proc.getInputStream))
+			val stdErr = new BufferedReader(new InputStreamReader(proc.getErrorStream))
 
 			Stream.continually(stdOut.readLine()).takeWhile(_ != null).foreach(statusScript(_))
 			Stream.continually(stdErr.readLine()).takeWhile(_ != null).foreach(statusScript(_))
