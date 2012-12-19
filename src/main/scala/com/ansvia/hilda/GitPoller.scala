@@ -39,7 +39,7 @@ case class GitPoller(gitUri:String, branch:String)
         super.setWorkingDir(workDir)
         var rv = WorkDirState.WORK_DIR_EXISTS
         if(!workingDir.exists()){
-
+            log.info("log file doesn't exists: " + workingDir.getAbsolutePath)
             if (mod.isQuiet){
                 status("Cloning...")
                 exec("git clone " + gitUri + " " + workDir)
