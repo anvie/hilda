@@ -320,7 +320,7 @@ case class StandardModule(updater: Updater,
 
 
 object Module {
-	private val updater = new Updater()
+	private val updater = new Updater(Hilda.getHildaHome + "/modules.xml")
 	updater.ensureConfig()
 	def getModules:Array[IHildaModule] = {
 		updater.getModules

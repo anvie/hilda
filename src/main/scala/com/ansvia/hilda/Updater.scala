@@ -6,13 +6,13 @@ import scala.xml.XML
 import scala.xml.Node
 
 
-class Updater() {
+class Updater(modulesFile:String) {
 
 
     private val log = LoggerFactory.getLogger(getClass)
 
     var initialized: Boolean = false
-    val modulesFile = Hilda.getHildaHome + "/modules.xml"
+//    val modulesFile = Hilda.getHildaHome + "/modules.xml"
     var cachedModules: Array[IHildaModule] = null
 
 

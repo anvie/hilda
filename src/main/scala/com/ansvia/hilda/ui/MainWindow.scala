@@ -18,7 +18,7 @@ import javax.swing.table.{AbstractTableModel, TableModel}
 
 class MainWindow extends SimpleSwingApplication {
 
-    lazy val upd = new Updater()
+    lazy val upd = new Updater(Hilda.getHildaHome + "/modules.xml")
     var modules = Array[IModuleUi]() 
 
     case class Logger(txt:TextArea) extends ILogger {

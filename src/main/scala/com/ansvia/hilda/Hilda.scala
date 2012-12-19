@@ -77,11 +77,15 @@ Internal Ansvia modules updater.
             'node -> false,
             'hildaHome -> HILDA_HOME,
             'hildaVersion -> false,
-            'quietMode -> false)
+            'quietMode -> false,
+            'deploy -> None)
 
         val cli = new OptionParser()
         cli.banner = BANNER
         cli.flag("-m", "--modules", "Show registered modules.") { () => options += 'modules -> true }
+        cli.reqd[String]("-d", "--deploy <module-file>", "Using specific module.xml file.") { v =>
+          options += 'deploy -> Some(v)
+        }
         cli.flag("", "--router", "Run as router."){() =>
             options += 'asRouter -> true
             println("Running as router")
@@ -130,9 +134,17 @@ Internal Ansvia modules updater.
             return
         }
 
+      val engine =
+        if (options('deploy).asInstanceOf[Option[String]].isDefined){
+          val deployFile = options('deploy).asInstanceOf[Option[String]].get
+          println("deployFile: " + deployFile)
+          new Updater(deployFile)
+        }else{
+          new Updater(getHildaHome + "/modules.xml")
+        }
+
         var rv = Error.UNKNOWN_ERROR
 
-        val engine = new Updater()
         engine.ensureConfig()
 
 //        println("options('quietMode): " + (options('quietMode) == true))

@@ -70,8 +70,8 @@ case class HildaNode(routerHostName:String, port:Int, routerName:String, nodeNam
 				
 				case msg.Update(nodeName:String, modName:String) =>
 					log.info("in msg.Update(): receiving remote update for `" + modName + "`")
-					val engine = new Updater()
-					
+					val engine = new Updater(Hilda.getHildaHome + "/modules.xml")
+
 					engine.ensureConfig()
 					
 					if(engine.moduleExists(modName)){
