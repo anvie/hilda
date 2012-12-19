@@ -1,20 +1,72 @@
 package com.ansvia.hilda
 import org.slf4j.LoggerFactory
-import java.io.File
+import java.io.{FileWriter, File}
 import scala.xml.Elem
 import scala.xml.XML
 import scala.xml.Node
 
 
 class Updater(modulesFile:String) {
+    def saveModules(){
+        val f = new FileWriter(new File("/tmp/modules.xml"))
+        val data = loadData()
+        f.write(data.toString())
+    }
 
 
     private val log = LoggerFactory.getLogger(getClass)
+
+
+    case class InitDefItem(key:String, value:String)
+
+    case class InitDef(node:Node) {
+
+        lazy val definitonCount = {
+            (node \\ "definitions" \\ "def").length
+        }
+        lazy val definitions = {
+            (node \ "definitions" \\ "def") map { n =>
+                val key = (n \ "@name").text
+                val defaultValue = (n \ "@default").text
+                var value = Console.readLine("%s [%s]: ".format(key, defaultValue))
+                if (value == null || value.length == 0)
+                    value = defaultValue
+                InitDefItem(key, value)
+            }
+        }
+    }
+
+    implicit var initDef:InitDef = null
+
+    case class WithTransform(str:String){
+        def transform(implicit initDef:InitDef) = {
+            var rv = str
+            if (!initMode){
+                rv
+            }else{
+                for ( d <- initDef.definitions ){
+                    val repl = java.util.regex.Pattern.quote("""%%{%s}""".format(d.key))
+                    rv = rv.replaceAll(repl, d.value)
+                }
+                rv
+            }
+
+        }
+    }
+
+    implicit def stringWithTransform(str:String) = WithTransform(str)
 
     var initialized: Boolean = false
 //    val modulesFile = Hilda.getHildaHome + "/modules.xml"
     var cachedModules: Array[IHildaModule] = null
 
+
+    var initMode = false
+
+    def setInitMode(state: Boolean){
+        initMode = state
+        initialized = state
+    }
 
     private var quiet = false
     def setQuiet(state: Boolean){
@@ -110,7 +162,7 @@ class Updater(modulesFile:String) {
                 return null
         }
 
-        val workDir = (m \ "work" \ "@dir").text
+        val workDir = (m \ "work" \ "@dir").text.transform
 
         val hooks: Array[Hook] = (m \\ "hook").map {
             z =>
@@ -196,7 +248,20 @@ class Updater(modulesFile:String) {
         modules foreach (m => println(" * " + m))
     }
 
+
+
     def doAction(modName:String): Int = {
+
+        if(initMode){
+            val data = loadData()
+            if(data == null){
+                return Error.DATA_NOT_LOADED
+            }
+
+            initDef = InitDef((data \ "init").apply(0))
+
+        }
+
         val mod = getModule(modName)
         if(mod != null){
             mod.selfUpdate()
@@ -211,6 +276,16 @@ class Updater(modulesFile:String) {
         if (!initialized) {
             log.error("Hilda engine not initialized")
             return Error.NOT_INITIALIZED
+        }
+
+        if(initMode){
+            val data = loadData()
+            if(data == null){
+                return Error.DATA_NOT_LOADED
+            }
+
+            initDef = InitDef((data \ "init").apply(0))
+
         }
 
         val modules = getModules

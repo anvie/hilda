@@ -15,7 +15,7 @@ object Hilda {
 Hilda v""" + VERSION + """
 Copyright (C) 2011 Ansvia Inc.
 Internal Ansvia modules updater.
-"""
+                       """
     private val HILDA_HOME = System.getProperty("user.home") + "/.hilda"
     private val INSTALL_PREFIX = "/usr/local"
     private var CUSTOM_HILDA_HOME:String = null
@@ -78,13 +78,13 @@ Internal Ansvia modules updater.
             'hildaHome -> HILDA_HOME,
             'hildaVersion -> false,
             'quietMode -> false,
-            'deploy -> None)
+            'init -> None)
 
         val cli = new OptionParser()
         cli.banner = BANNER
         cli.flag("-m", "--modules", "Show registered modules.") { () => options += 'modules -> true }
-        cli.reqd[String]("-d", "--deploy <module-file>", "Using specific module.xml file.") { v =>
-          options += 'deploy -> Some(v)
+        cli.reqd[String]("-i", "--init <module-file>", "Using specific module.xml file.") { v =>
+            options += 'init -> Some(v)
         }
         cli.flag("", "--router", "Run as router."){() =>
             options += 'asRouter -> true
@@ -134,20 +134,31 @@ Internal Ansvia modules updater.
             return
         }
 
-      val engine =
-        if (options('deploy).asInstanceOf[Option[String]].isDefined){
-          val deployFile = options('deploy).asInstanceOf[Option[String]].get
-          println("deployFile: " + deployFile)
-          new Updater(deployFile)
-        }else{
-          new Updater(getHildaHome + "/modules.xml")
+        var init = false
+        val engine =
+            if (options('init).asInstanceOf[Option[String]].isDefined){
+                init = true
+                val moduleInitFile = options('init).asInstanceOf[Option[String]].get
+                //          println("deployFile: " + deployFile)
+                new Updater(moduleInitFile)
+            }else{
+                new Updater(getHildaHome + "/modules.xml")
+            }
+
+
+        if (init){
+            engine.setInitMode(true)
+            engine.doAction()
+            engine.saveModules()
+            return
         }
+
 
         var rv = Error.UNKNOWN_ERROR
 
         engine.ensureConfig()
 
-//        println("options('quietMode): " + (options('quietMode) == true))
+        //        println("options('quietMode): " + (options('quietMode) == true))
         engine.setQuiet(options('quietMode) == true)
 
         log.info("Using hilda home: `%s`".format(getHildaHome))
