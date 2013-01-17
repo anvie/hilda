@@ -10,7 +10,7 @@ import ch.qos.logback.classic.LoggerContext
 
 object Hilda {
 
-    val VERSION = "0.0.14"
+    val VERSION = "0.0.15"
     val BANNER = """
 Hilda v""" + VERSION + """
 Copyright (C) 2011 Ansvia Inc.

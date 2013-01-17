@@ -194,9 +194,23 @@ case class StandardModule(updater: Updater,
         val state = poller match {
             case p:GitPoller =>
                 val Seq(branch, modified) = p.getCurrentStatusList
-                "branch: %s, version: %s, modified: %s".format(branch, getVersion, modified)
+
+                var rv = ""
+
+                if (modified == "true"){
+                    rv = Console.YELLOW
+                }else{
+                    rv = Console.RESET
+                }
+
+                rv += "branch: %s, version: %s, modified: %s".format(branch, getVersion, modified)
+
+                rv += Console.RESET
+
+              rv
+
             case _ =>
-                "**unknown**".format(getName)
+                Console.RED + "**unknown**".format(getName) + Console.RESET
         }
         state
     }
