@@ -1,4 +1,4 @@
-import AssemblyKeys._
+//import AssemblyKeys._
 
 name := "Hilda"
 
@@ -8,11 +8,11 @@ scalaVersion := "2.9.1"
 
 scalacOptions += "-deprecation"
 
-seq(assemblySettings: _*)
+//seq(assemblySettings: _*)
 
 seq(ProguardPlugin.proguardSettings :_*)
 
-mainClass in assembly := Some("com.ansvia.hilda.Hilda")
+//mainClass in assembly := Some("com.ansvia.hilda.Hilda")
 
 proguardOptions += keepMain("com.ansvia.hilda.Hilda")
 
