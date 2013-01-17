@@ -7,11 +7,6 @@ import scala.xml.Node
 
 
 class Updater(modulesFile:String) {
-    def saveModules(){
-        val f = new FileWriter(new File("/tmp/modules.xml"))
-        val data = loadData()
-        f.write(data.toString())
-    }
 
 
     private val log = LoggerFactory.getLogger(getClass)
@@ -59,7 +54,7 @@ class Updater(modulesFile:String) {
     var initialized: Boolean = false
 //    val modulesFile = Hilda.getHildaHome + "/modules.xml"
     var cachedModules: Array[IHildaModule] = null
-
+    private var quiet = false
 
     var initMode = false
 
@@ -68,9 +63,19 @@ class Updater(modulesFile:String) {
         initialized = state
     }
 
-    private var quiet = false
+
     def setQuiet(state: Boolean){
         quiet = state
+    }
+
+    def saveModules(){
+        val f = new FileWriter(new File("/tmp/modules.xml"))
+        val data = loadData()
+        val z = (data \ "init")
+        val m = (data \ "init" \ "definitions") map { n =>
+            (n \ "@value")
+        }
+        f.write(data.toString())
     }
 
 
