@@ -4,6 +4,9 @@ Hilda
 
 Project updater, deployment, and management tool. Support Git and Rsync protocol too keep your projects up-to-date.
 
+For Hilda >= 0.1.0 default hilda home not in User.home `~/.hilda` but located in `/etc/hilda`, you can always override
+this behaviour by setting environment variable `HILDA_HOME` pointing to your own path.
+
 
 Usage
 -------

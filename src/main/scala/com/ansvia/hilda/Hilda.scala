@@ -10,13 +10,19 @@ import ch.qos.logback.classic.LoggerContext
 
 object Hilda {
 
-    val VERSION = "0.0.15"
+    val VERSION = "0.1.0"
     val BANNER = """
 Hilda v""" + VERSION + """
 Copyright (C) 2011 Ansvia Inc.
 Internal Ansvia modules updater.
                        """
-    private val HILDA_HOME = System.getProperty("user.home") + "/.hilda"
+    private lazy val HILDA_HOME = {
+        val envHome = System.getenv().get("HILDA_HOME")
+        if (envHome != null)
+            envHome
+        else
+            "/etc/hilda"
+    }
     private val INSTALL_PREFIX = "/usr/local"
     private var CUSTOM_HILDA_HOME:String = null
 
@@ -265,7 +271,7 @@ Internal Ansvia modules updater.
 
                 case "install" =>
                     if ((new File(HILDA_HOME + "/modules.xml")).exists() &&
-                            (new File(INSTALL_PREFIX + "/bin/hilda")).exists())
+                        (new File(INSTALL_PREFIX + "/bin/hilda")).exists())
                     {
                         println(" Hilda already installed")
                         println(" Edit `~/.hilda/modules.xml` if you want to customize modules.")
